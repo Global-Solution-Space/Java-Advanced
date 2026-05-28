@@ -1,4 +1,4 @@
-package fiap.com.br.terranova.usuario;
+package fiap.com.br.terranova.produtor;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "usuarios")
-public class Usuario {
+@Table(name = "produtores")
+public class Produtor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
