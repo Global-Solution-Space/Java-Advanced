@@ -1,15 +1,29 @@
 package fiap.com.br.terranova.localizacao.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import fiap.com.br.terranova.localizacao.Localizacao;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import fiap.com.br.terranova.localizacao.LocalizacaoController;
+
 import java.math.BigDecimal;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class LocalizacaoResponse {
-    private Long id_localizacao;
-    private BigDecimal loc_latitude;
-    private BigDecimal loc_longitude;
+public record LocalizacaoResponse(
+        Long id,
+        BigDecimal locLatitude,
+        BigDecimal locLongitude
+) {
+    public static LocalizacaoResponse fromEntity(Localizacao entity) {
+        return new LocalizacaoResponse(
+                entity.getIdLocalizacao(),
+                entity.getLocLatitude(),
+                entity.getLocLongitude()
+        );
+    }
+
+    public EntityModel<LocalizacaoResponse> toEntityModel() {
+        var linkSelf = linkTo(methodOn(LocalizacaoController.class).findById(id)).withSelfRel().withTitle("Detalhes da localizacao");
+        var linkAll = linkTo(methodOn(LocalizacaoController.class).findAll(null)).withRel("all-localizacoes").withTitle("Todas as localizacoes");
+        return EntityModel.of(this, linkSelf, linkAll);
+    }
 }

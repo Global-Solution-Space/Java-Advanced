@@ -1,55 +1,49 @@
 package fiap.com.br.terranova.tipoplantacao;
 
+import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.tipoplantacao.dto.TipoPlantacaoRequest;
 import fiap.com.br.terranova.tipoplantacao.dto.TipoPlantacaoResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class TipoPlantacaoService {
 
     private final TipoPlantacaoRepository repository;
 
-    public TipoPlantacaoService(TipoPlantacaoRepository repository) {
-        this.repository = repository;
+    public Page<TipoPlantacaoResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(TipoPlantacaoResponse::fromEntity);
     }
 
-    public TipoPlantacaoResponse criar(TipoPlantacaoRequest request) {
-        TipoPlantacao entity = new TipoPlantacao();
-        entity.setTipo_plant(request.getTipo_plant());
-        return converterParaResponse(repository.save(entity));
+    public TipoPlantacaoResponse findById(Long id) {
+        return TipoPlantacaoResponse.fromEntity(findTipoPlantacaoById(id));
     }
 
-    public List<TipoPlantacaoResponse> listarTodos() {
-        return repository.findAll().stream()
-                .map(this::converterParaResponse)
-                .collect(Collectors.toList());
+    @Transactional
+    public TipoPlantacaoResponse create(TipoPlantacaoRequest request) {
+        return TipoPlantacaoResponse.fromEntity(repository.save(request.toEntity()));
     }
 
-    public TipoPlantacaoResponse buscarPorId(Long id) {
-        TipoPlantacao entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de Plantação não encontrado com ID: " + id));
-        return converterParaResponse(entity);
+    @Transactional
+    public TipoPlantacaoResponse update(Long id, TipoPlantacaoRequest request) {
+        findTipoPlantacaoById(id);
+        TipoPlantacao entity = request.toEntity();
+        entity.setIdTipoPlant(id);
+        return TipoPlantacaoResponse.fromEntity(repository.save(entity));
     }
 
-    public TipoPlantacaoResponse atualizar(Long id, TipoPlantacaoRequest request) {
-        TipoPlantacao existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de Plantação não encontrado com ID: " + id));
-        existente.setTipo_plant(request.getTipo_plant());
-        return converterParaResponse(repository.save(existente));
-    }
-
-    public void deletar(Long id) {
-        TipoPlantacao entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tipo de Plantação não encontrado com ID: " + id));
+    @Transactional
+    public void delete(Long id) {
+        TipoPlantacao entity = findTipoPlantacaoById(id);
         repository.delete(entity);
     }
 
-    private TipoPlantacaoResponse converterParaResponse(TipoPlantacao entity) {
-        TipoPlantacaoResponse response = new TipoPlantacaoResponse();
-        response.setId_tipo_plant(entity.getId_tipo_plant());
-        response.setTipo_plant(entity.getTipo_plant());
-        return response;
+    private TipoPlantacao findTipoPlantacaoById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("TipoPlantacao com id " + id + " nao encontrado."));
     }
 }

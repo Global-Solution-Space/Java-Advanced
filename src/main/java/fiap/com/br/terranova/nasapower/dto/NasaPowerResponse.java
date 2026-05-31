@@ -1,20 +1,33 @@
 package fiap.com.br.terranova.nasapower.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import fiap.com.br.terranova.nasapower.NasaPower;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import fiap.com.br.terranova.nasapower.NasaPowerController;
 
 import java.math.BigDecimal;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class NasaPowerResponse {
-    private Long id_nasapower;
-    private String data_inicio;
-    private String data_fim;
-    private BigDecimal latitude;
-    private BigDecimal longitude;
-    private BigDecimal elevacao;
-    private Long id_talhao;
+public record NasaPowerResponse(
+        Long id,
+        String dataInicio,
+        String dataFim,
+        BigDecimal elevacao,
+        Long idTalhao
+) {
+    public static NasaPowerResponse fromEntity(NasaPower entity) {
+        return new NasaPowerResponse(
+                entity.getIdNasapower(),
+                entity.getDataInicio(),
+                entity.getDataFim(),
+                entity.getElevacao(),
+                entity.getTalhao().getIdTalhao()
+        );
+    }
+
+    public EntityModel<NasaPowerResponse> toEntityModel() {
+        var linkSelf = linkTo(methodOn(NasaPowerController.class).findById(id)).withSelfRel().withTitle("Detalhes da analise da NASA");
+        var linkAll = linkTo(methodOn(NasaPowerController.class).findAll(null)).withRel("all-nasapower").withTitle("Todas as analises");
+        return EntityModel.of(this, linkSelf, linkAll);
+    }
 }

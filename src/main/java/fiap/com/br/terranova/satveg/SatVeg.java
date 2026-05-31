@@ -3,6 +3,7 @@ package fiap.com.br.terranova.satveg;
 import fiap.com.br.terranova.talhao.Talhao;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "satveg")
@@ -18,35 +20,28 @@ public class SatVeg {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_satveg") //
-    private Long id_satveg;
+    @Column(name = "id_satveg")
+    private Long idSatveg;
 
-    @Column(name = "tipo_perfil", precision = 5, scale = 2)
-    private BigDecimal tipo_perfil;
+    @Column(name = "tipo_perfil", nullable = false)
+    private BigDecimal tipoPerfil;
 
-    @Column(name = "satelite", precision = 5, scale = 2)
+    @Column(name = "satelite", nullable = false)
     private BigDecimal satelite;
 
     @Column(name = "pre_filtro", precision = 1)
-    private Integer pre_filtro;
+    private Integer preFiltro;
 
     @Column(name = "filtro", length = 3)
     private String filtro;
 
     @Column(name = "parametro_filtro", precision = 2)
-    private Integer parametro_filtro;
+    private Integer parametroFiltro;
 
-    @Lob
-    @Column(name = "poligono")
-    private String poligono;
-
-    @Column(name = "todas_estatisticas")
-    private Boolean todas_estatisticas;
-
-    @Column(name = "data_analise")
-    private Timestamp data_analise;
+    @Column(name = "data_analise", nullable = false)
+    private Timestamp dataAnalise;
 
     @ManyToOne
-    @JoinColumn(name = "id_talhao")
+    @JoinColumn(name = "talhao_id_talhao")
     private Talhao talhao;
 }

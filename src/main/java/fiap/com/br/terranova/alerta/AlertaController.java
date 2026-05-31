@@ -2,49 +2,46 @@ package fiap.com.br.terranova.alerta;
 
 import fiap.com.br.terranova.alerta.dto.AlertaRequest;
 import fiap.com.br.terranova.alerta.dto.AlertaResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.hateoas.EntityModel;
 
 @RestController
 @RequestMapping("/api/alertas")
+@RequiredArgsConstructor
 public class AlertaController {
 
-    private final AlertaService alertaService;
-
-    public AlertaController(AlertaService alertaService) {
-        this.alertaService = alertaService;
-    }
-
-    @PostMapping
-    public ResponseEntity<AlertaResponse> criar(@RequestBody AlertaRequest request) {
-        AlertaResponse novoAlerta = alertaService.criar(request);
-        return new ResponseEntity<>(novoAlerta, HttpStatus.CREATED);
-    }
+    private final AlertaService service;
 
     @GetMapping
-    public ResponseEntity<List<AlertaResponse>> listarTodos() {
-        List<AlertaResponse> alertas = alertaService.listarTodos();
-        return ResponseEntity.ok(alertas);
+    public ResponseEntity<Page<EntityModel<AlertaResponse>>> findAll(Pageable pageable) {
+        Page<EntityModel<AlertaResponse>> page = service.findAll(pageable).map(AlertaResponse::toEntityModel);
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AlertaResponse> buscarPorId(@PathVariable Long id) {
-        AlertaResponse alerta = alertaService.buscarPorId(id);
-        return ResponseEntity.ok(alerta);
+    public ResponseEntity<EntityModel<AlertaResponse>> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id).toEntityModel());
+    }
+
+    @PostMapping
+    public ResponseEntity<EntityModel<AlertaResponse>> create(@RequestBody @Valid AlertaRequest request) {
+        return new ResponseEntity<>(service.create(request).toEntityModel(), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlertaResponse> atualizar(@PathVariable Long id, @RequestBody AlertaRequest request) {
-        AlertaResponse atualizado = alertaService.atualizar(id, request);
-        return ResponseEntity.ok(atualizado);
+    public ResponseEntity<EntityModel<AlertaResponse>> update(@PathVariable Long id, @RequestBody @Valid AlertaRequest request) {
+        return ResponseEntity.ok(service.update(id, request).toEntityModel());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        alertaService.deletar(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

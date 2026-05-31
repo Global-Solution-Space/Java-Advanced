@@ -1,85 +1,96 @@
 package fiap.com.br.terranova.nasapower;
 
+import fiap.com.br.terranova.exception.ResourceNotFoundException;
+import fiap.com.br.terranova.integration.nasa.NasaPowerClient;
+import fiap.com.br.terranova.integration.nasa.NasaPowerDataResponse;
 import fiap.com.br.terranova.nasapower.dto.NasaPowerRequest;
 import fiap.com.br.terranova.nasapower.dto.NasaPowerResponse;
-import fiap.com.br.terranova.talhao.TalhaoRepository; // <-- Importado
+import fiap.com.br.terranova.talhao.Talhao;
+import fiap.com.br.terranova.talhao.TalhaoRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class NasaPowerService {
 
     private final NasaPowerRepository repository;
     private final TalhaoRepository talhaoRepository;
+    private final NasaPowerClient nasaPowerClient;
 
-    public NasaPowerService(NasaPowerRepository repository, TalhaoRepository talhaoRepository) {
-        this.repository = repository;
-        this.talhaoRepository = talhaoRepository;
+    public Page<NasaPowerResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(NasaPowerResponse::fromEntity);
     }
 
-    public NasaPowerResponse criar(NasaPowerRequest request) {
-        NasaPower entity = complementarEntidade(new NasaPower(), request);
-        return converterParaResponse(repository.save(entity));
+    public NasaPowerResponse findById(Long id) {
+        return NasaPowerResponse.fromEntity(findNasaPowerById(id));
     }
 
-    public List<NasaPowerResponse> listarTodos() {
-        return repository.findAll().stream()
-                .map(this::converterParaResponse)
-                .collect(Collectors.toList());
+    @Transactional
+    public NasaPowerResponse create(NasaPowerRequest request) {
+        Talhao talhao = getTalhao(request.idTalhao());
+        NasaPower entity = request.toEntity(talhao);
+
+        try {
+            log.info("Buscando dados climaticos da NASA para o Talhao {}", talhao.getIdTalhao());
+            NasaPowerDataResponse apiResponse = nasaPowerClient.getDailyData(buildApiQuery(request, talhao));
+
+            BigDecimal elevacaoApi = BigDecimal.valueOf(apiResponse.geometry().coordinates().get(2));
+            entity.setElevacao(elevacaoApi);
+            log.info("Elevacao de {} recebida com sucesso da NASA.", elevacaoApi);
+
+        } catch (Exception e) {
+            log.error("Erro ao integrar com a API da NASA. Usando dados de fallback do Request.", e);
+        }
+
+        return NasaPowerResponse.fromEntity(repository.save(entity));
     }
 
-    public NasaPowerResponse buscarPorId(Long id) {
-        NasaPower entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("NasaPower não encontrado com o ID: " + id));
-        return converterParaResponse(entity);
+    @Transactional
+    public NasaPowerResponse update(Long id, NasaPowerRequest request) {
+        findNasaPowerById(id);
+        NasaPower entity = request.toEntity(getTalhao(request.idTalhao()));
+        entity.setIdNasapower(id);
+        return NasaPowerResponse.fromEntity(repository.save(entity));
     }
 
-    public NasaPowerResponse atualizar(Long id, NasaPowerRequest request) {
-        NasaPower existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("NasaPower não encontrado com o ID: " + id));
-        complementarEntidade(existente, request);
-        return converterParaResponse(repository.save(existente));
-    }
-
-    public void deletar(Long id) {
-        NasaPower entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("NasaPower não encontrado com o ID: " + id));
+    @Transactional
+    public void delete(Long id) {
+        NasaPower entity = findNasaPowerById(id);
         repository.delete(entity);
     }
 
-    private NasaPower complementarEntidade(NasaPower entity, NasaPowerRequest request) {
-        entity.setData_inicio(request.getData_inicio());
-        entity.setData_fim(request.getData_fim());
-        entity.setLatitude(request.getLatitude());
-        entity.setLongitude(request.getLongitude());
-        entity.setElevacao(request.getElevacao());
-
-        // Busca o Talhão e associa à entidade NasaPower
-        if (request.getId_talhao() != null) {
-            entity.setTalhao(talhaoRepository.findById(request.getId_talhao())
-                    .orElseThrow(() -> new RuntimeException("Talhão não encontrado com ID: " + request.getId_talhao())));
-        } else {
-            entity.setTalhao(null);
-        }
-
-        return entity;
+    private NasaPower findNasaPowerById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("NasaPower com id " + id + " nao encontrado."));
     }
 
-    private NasaPowerResponse converterParaResponse(NasaPower entity) {
-        NasaPowerResponse response = new NasaPowerResponse();
-        response.setId_nasapower(entity.getId_nasapower());
-        response.setData_inicio(entity.getData_inicio());
-        response.setData_fim(entity.getData_fim());
-        response.setLatitude(entity.getLatitude());
-        response.setLongitude(entity.getLongitude());
-        response.setElevacao(entity.getElevacao());
+    private Talhao getTalhao(Long id) {
+        return talhaoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
+    }
 
-        // Mapeia o ID do talhão de volta para o Response DTO
-        if (entity.getTalhao() != null) {
-            response.setId_talhao(entity.getTalhao().getId_talhao());
-        }
-
-        return response;
+    private Map<String, Object> buildApiQuery(NasaPowerRequest request, Talhao talhao) {
+        return Map.ofEntries(
+                Map.entry("start", request.dataInicio()),
+                Map.entry("end", request.dataFim()),
+                Map.entry("latitude", talhao.getLocalizacao().getLocLatitude()),
+                Map.entry("longitude", talhao.getLocalizacao().getLocLongitude()),
+                Map.entry("community", "ag"),
+                Map.entry("parameters", "PRECTOTCORR,T2M"),
+                Map.entry("format", "JSON"),
+                Map.entry("units", "metric"),
+                Map.entry("user", "terranova"),
+                Map.entry("header", true),
+                Map.entry("time-standard", "UTC")
+        );
     }
 }

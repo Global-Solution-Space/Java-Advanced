@@ -1,14 +1,21 @@
 package fiap.com.br.terranova.localizacao.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import fiap.com.br.terranova.localizacao.Localizacao;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class LocalizacaoRequest {
-    private BigDecimal loc_latitude;
-    private BigDecimal loc_longitude;
+public record LocalizacaoRequest(
+        @NotNull
+        BigDecimal locLatitude,
+
+        @NotNull
+        BigDecimal locLongitude
+) {
+    public Localizacao toEntity() {
+        return Localizacao.builder()
+                .locLatitude(locLatitude)
+                .locLongitude(locLongitude)
+                .build();
+    }
 }

@@ -1,86 +1,87 @@
 package fiap.com.br.terranova.satveg;
 
+import fiap.com.br.terranova.exception.ResourceNotFoundException;
+import fiap.com.br.terranova.integration.satveg.SatVegClient;
+import fiap.com.br.terranova.integration.satveg.SatVegDataRequest;
+import fiap.com.br.terranova.integration.satveg.SatVegDataResponse;
 import fiap.com.br.terranova.satveg.dto.SatVegRequest;
 import fiap.com.br.terranova.satveg.dto.SatVegResponse;
+import fiap.com.br.terranova.talhao.Talhao;
 import fiap.com.br.terranova.talhao.TalhaoRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class SatVegService {
 
     private final SatVegRepository repository;
     private final TalhaoRepository talhaoRepository;
+    private final SatVegClient satVegClient;
 
-    public SatVegService(SatVegRepository repository, TalhaoRepository talhaoRepository) {
-        this.repository = repository;
-        this.talhaoRepository = talhaoRepository;
+    public Page<SatVegResponse> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(SatVegResponse::fromEntity);
     }
 
-    public SatVegResponse criar(SatVegRequest request) {
-        SatVeg entity = complementarEntidade(new SatVeg(), request);
-        return converterParaResponse(repository.save(entity));
+    public SatVegResponse findById(Long id) {
+        return SatVegResponse.fromEntity(findSatVegById(id));
     }
 
-    public List<SatVegResponse> listarTodos() {
-        return repository.findAll().stream()
-                .map(this::converterParaResponse)
-                .collect(Collectors.toList());
+    @Transactional
+    public SatVegResponse create(SatVegRequest request) {
+        Talhao talhao = getTalhao(request.idTalhao());
+
+        try {
+            log.info("Buscando series temporais na Embrapa SATveg para o Talhao {}", talhao.getIdTalhao());
+            SatVegDataResponse apiResponse = satVegClient.getSeries(buildApiRequest(request, talhao));
+
+            log.info("Sucesso! O SATveg retornou {} pontos de serie temporal para a localizacao informada.", apiResponse.listaSerie().size());
+
+        } catch (Exception e) {
+            log.error("Erro ao integrar com a API da Embrapa SATveg", e);
+        }
+
+        return SatVegResponse.fromEntity(repository.save(request.toEntity(talhao)));
     }
 
-    public SatVegResponse buscarPorId(Long id) {
-        SatVeg entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("SatVeg não encontrado com o ID: " + id));
-        return converterParaResponse(entity);
+    @Transactional
+    public SatVegResponse update(Long id, SatVegRequest request) {
+        findSatVegById(id);
+        SatVeg entity = request.toEntity(getTalhao(request.idTalhao()));
+        entity.setIdSatveg(id);
+        return SatVegResponse.fromEntity(repository.save(entity));
     }
 
-    public SatVegResponse atualizar(Long id, SatVegRequest request) {
-        SatVeg existente = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("SatVeg não encontrado com o ID: " + id));
-
-        complementarEntidade(existente, request);
-        return converterParaResponse(repository.save(existente));
-    }
-
-    public void deletar(Long id) {
-        SatVeg entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("SatVeg não encontrado com o ID: " + id));
+    @Transactional
+    public void delete(Long id) {
+        SatVeg entity = findSatVegById(id);
         repository.delete(entity);
     }
 
-    private SatVeg complementarEntidade(SatVeg entity, SatVegRequest request) {
-        entity.setTipo_perfil(request.getTipo_perfil());
-        entity.setSatelite(request.getSatelite());
-        entity.setPre_filtro(request.getPre_filtro());
-        entity.setFiltro(request.getFiltro());
-        entity.setParametro_filtro(request.getParametro_filtro());
-        entity.setPoligono(request.getPoligono());
-        entity.setTodas_estatisticas(request.getTodas_estatisticas());
-        entity.setData_analise(request.getData_analise());
-
-        if (request.getId_talhao() != null) {
-            entity.setTalhao(talhaoRepository.findById(request.getId_talhao())
-                    .orElseThrow(() -> new RuntimeException("Talhão não encontrado com ID: " + request.getId_talhao())));
-        }
-        return entity;
+    private SatVeg findSatVegById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("SatVeg com id " + id + " nao encontrado."));
     }
 
-    private SatVegResponse converterParaResponse(SatVeg entity) {
-        SatVegResponse response = new SatVegResponse();
-        response.setId_satveg(entity.getId_satveg());
-        response.setTipo_perfil(entity.getTipo_perfil());
-        response.setSatelite(entity.getSatelite());
-        response.setPre_filtro(entity.getPre_filtro());
-        response.setFiltro(entity.getFiltro());
-        response.setParametro_filtro(entity.getParametro_filtro());
-        response.setPoligono(entity.getPoligono());
-        response.setTodas_estatisticas(entity.getTodas_estatisticas());
-        response.setData_analise(entity.getData_analise());
+    private Talhao getTalhao(Long id) {
+        return talhaoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
+    }
 
-        if (entity.getTalhao() != null) {
-            response.setId_talhao(entity.getTalhao().getId_talhao());
-        }
-        return response;
+    private SatVegDataRequest buildApiRequest(SatVegRequest request, Talhao talhao) {
+        return SatVegDataRequest.builder()
+                .tipoPerfil(request.tipoPerfil().intValue() == 1 ? "ndvi" : "evi")
+                .satelite(request.satelite().intValue() == 1 ? "comb" : "modis")
+                .preFiltro(request.preFiltro())
+                .filtro(request.filtro())
+                .parametroFiltro(request.parametroFiltro())
+                .latitude(talhao.getLocalizacao().getLocLatitude())
+                .longitude(talhao.getLocalizacao().getLocLongitude())
+                .build();
     }
 }

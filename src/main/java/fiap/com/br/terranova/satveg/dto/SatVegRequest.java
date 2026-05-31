@@ -1,22 +1,42 @@
 package fiap.com.br.terranova.satveg.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import fiap.com.br.terranova.satveg.SatVeg;
+import fiap.com.br.terranova.talhao.Talhao;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SatVegRequest {
-    private BigDecimal tipo_perfil;
-    private BigDecimal satelite;
-    private Integer pre_filtro;
-    private String filtro;
-    private Integer parametro_filtro;
-    private String poligono;
-    private Boolean todas_estatisticas;
-    private Timestamp data_analise;
-    private Long id_talhao;
+public record SatVegRequest(
+        @NotNull
+        BigDecimal tipoPerfil,
+
+        @NotNull
+        BigDecimal satelite,
+
+        Integer preFiltro,
+
+        @Size(max = 3)
+        String filtro,
+
+        Integer parametroFiltro,
+
+        @NotNull
+        Timestamp dataAnalise,
+
+        @NotNull
+        Long idTalhao
+) {
+    public SatVeg toEntity(Talhao talhao) {
+        return SatVeg.builder()
+                .tipoPerfil(tipoPerfil)
+                .satelite(satelite)
+                .preFiltro(preFiltro)
+                .filtro(filtro)
+                .parametroFiltro(parametroFiltro)
+                .dataAnalise(dataAnalise)
+                .talhao(talhao)
+                .build();
+    }
 }

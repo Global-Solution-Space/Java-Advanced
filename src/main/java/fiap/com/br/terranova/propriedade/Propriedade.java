@@ -4,12 +4,14 @@ import fiap.com.br.terranova.localizacao.Localizacao;
 import fiap.com.br.terranova.produtor.Produtor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "propriedade")
@@ -18,19 +20,19 @@ public class Propriedade {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_propriedade")
-    private Long id_propriedade;
+    private Long idPropriedade;
 
-    @Column(name = "nome", length = 30)
+    @Column(name = "nome", length = 30, nullable = false)
     private String nome;
 
-    @Column(name = "tamanho_total", precision = 10, scale = 2)
+    @Column(name = "tamanho_total", nullable = false)
     private BigDecimal tamanhoTotal;
 
     @ManyToOne
-    @JoinColumn(name = "id_produtor")
+    @JoinColumn(name = "produtor_id_produtor")
     private Produtor produtor;
 
-    @ManyToOne
-    @JoinColumn(name = "id_localizacao")
+    @OneToOne
+    @JoinColumn(name = "localizacao_id_localizacao")
     private Localizacao localizacao;
 }
