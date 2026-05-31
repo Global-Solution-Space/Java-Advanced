@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Entity
 @Data
@@ -29,6 +30,9 @@ public class NasaPower {
 
     @Column(name = "elevacao", precision = 5, scale = 2, nullable = false)
     private BigDecimal elevacao;
+
+    @Column(name = "data_analise", nullable = false)
+    private Timestamp dataAnalise;
 
     @ManyToOne
     @JoinColumn(name = "talhao_id_talhao")

@@ -7,12 +7,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import fiap.com.br.terranova.nasapower.NasaPowerController;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 public record NasaPowerResponse(
         Long id,
         String dataInicio,
         String dataFim,
         BigDecimal elevacao,
+        Timestamp dataAnalise,
         Long idTalhao
 ) {
     public static NasaPowerResponse fromEntity(NasaPower entity) {
@@ -21,6 +23,7 @@ public record NasaPowerResponse(
                 entity.getDataInicio(),
                 entity.getDataFim(),
                 entity.getElevacao(),
+                entity.getDataAnalise(),
                 entity.getTalhao().getIdTalhao()
         );
     }

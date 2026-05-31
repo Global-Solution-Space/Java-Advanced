@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 public record NasaPowerRequest(
         @NotBlank
@@ -31,6 +32,7 @@ public record NasaPowerRequest(
                 .dataInicio(dataInicio)
                 .dataFim(dataFim)
                 .elevacao(elevacao)
+                .dataAnalise(new Timestamp(System.currentTimeMillis()))
                 .talhao(talhao)
                 .build();
     }

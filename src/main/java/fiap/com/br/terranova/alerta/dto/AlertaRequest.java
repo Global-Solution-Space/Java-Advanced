@@ -27,9 +27,6 @@ public record AlertaRequest(
         String resolvido,
 
         @NotNull
-        Timestamp dataAlerta,
-
-        @NotNull
         Long idSatveg,
 
         @NotNull
@@ -41,7 +38,7 @@ public record AlertaRequest(
                 .descricao(descricao)
                 .nivelAlerta(nivelAlerta)
                 .resolvido(resolvido)
-                .dataAlerta(dataAlerta)
+                .dataAlerta(new Timestamp(System.currentTimeMillis()))
                 .satVeg(satVeg)
                 .nasaPower(nasaPower)
                 .build();

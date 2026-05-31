@@ -36,9 +36,10 @@ public class AlertaService {
 
     @Transactional
     public AlertaResponse update(Long id, AlertaRequest request) {
-        findAlertaById(id);
+        Alerta existingEntity = findAlertaById(id);
         Alerta entity = request.toEntity(getSatVeg(request.idSatveg()), getNasaPower(request.idNasapower()));
         entity.setIdAlerta(id);
+        entity.setDataAlerta(existingEntity.getDataAlerta());
         return AlertaResponse.fromEntity(alertaRepository.save(entity));
     }
 

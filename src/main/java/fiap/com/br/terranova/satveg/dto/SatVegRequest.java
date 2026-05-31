@@ -23,9 +23,6 @@ public record SatVegRequest(
         Integer parametroFiltro,
 
         @NotNull
-        Timestamp dataAnalise,
-
-        @NotNull
         Long idTalhao
 ) {
     public SatVeg toEntity(Talhao talhao) {
@@ -35,7 +32,7 @@ public record SatVegRequest(
                 .preFiltro(preFiltro)
                 .filtro(filtro)
                 .parametroFiltro(parametroFiltro)
-                .dataAnalise(dataAnalise)
+                .dataAnalise(new Timestamp(System.currentTimeMillis()))
                 .talhao(talhao)
                 .build();
     }

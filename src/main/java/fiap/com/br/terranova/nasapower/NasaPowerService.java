@@ -56,9 +56,11 @@ public class NasaPowerService {
 
     @Transactional
     public NasaPowerResponse update(Long id, NasaPowerRequest request) {
-        findNasaPowerById(id);
+        NasaPower existingEntity = findNasaPowerById(id);
         NasaPower entity = request.toEntity(getTalhao(request.idTalhao()));
         entity.setIdNasapower(id);
+        entity.setElevacao(existingEntity.getElevacao());
+        entity.setDataAnalise(existingEntity.getDataAnalise());
         return NasaPowerResponse.fromEntity(repository.save(entity));
     }
 

@@ -51,9 +51,10 @@ public class SatVegService {
 
     @Transactional
     public SatVegResponse update(Long id, SatVegRequest request) {
-        findSatVegById(id);
+        SatVeg existingEntity = findSatVegById(id);
         SatVeg entity = request.toEntity(getTalhao(request.idTalhao()));
         entity.setIdSatveg(id);
+        entity.setDataAnalise(existingEntity.getDataAnalise());
         return SatVegResponse.fromEntity(repository.save(entity));
     }
 
