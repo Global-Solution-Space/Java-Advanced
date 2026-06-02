@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.sql.Timestamp;
 
 @Entity
@@ -22,17 +22,21 @@ public class NasaPower {
     @Column(name = "id_nasapower")
     private Long idNasapower;
 
-    @Column(name = "data_inicio", length = 8, nullable = false)
-    private String dataInicio;
+    @Column(name = "data_inicio", nullable = false)
+    private LocalDate dataInicio;
 
-    @Column(name = "data_fim", length = 8, nullable = false)
-    private String dataFim;
+    @Column(name = "data_fim", nullable = false)
+    private LocalDate dataFim;
 
-    @Column(name = "elevacao", precision = 5, scale = 2, nullable = false)
-    private BigDecimal elevacao;
+    @Column(name = "parametro", length = 30, nullable = false)
+    private String parametro;
 
     @Column(name = "data_analise", nullable = false)
     private Timestamp dataAnalise;
+
+    @Lob
+    @Column(name = "dados_json", nullable = false)
+    private String dadosJson;
 
     @ManyToOne
     @JoinColumn(name = "talhao_id_talhao")

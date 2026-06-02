@@ -15,8 +15,7 @@ public record AlertaResponse(
         String nivelAlerta,
         String resolvido,
         Timestamp dataAlerta,
-        Long idSatveg,
-        Long idNasapower
+        Long idTalhao
 ) {
     public static AlertaResponse fromEntity(Alerta entity) {
         return new AlertaResponse(
@@ -26,8 +25,7 @@ public record AlertaResponse(
                 entity.getNivelAlerta(),
                 entity.getResolvido(),
                 entity.getDataAlerta(),
-                entity.getSatVeg().getIdSatveg(),
-                entity.getNasaPower().getIdNasapower()
+                entity.getTalhao().getIdTalhao()
         );
     }
 

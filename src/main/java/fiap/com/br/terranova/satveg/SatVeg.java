@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
@@ -23,23 +22,16 @@ public class SatVeg {
     @Column(name = "id_satveg")
     private Long idSatveg;
 
-    @Column(name = "tipo_perfil", nullable = false)
-    private BigDecimal tipoPerfil;
+    @Column(name = "tipo_perfil", length = 4, nullable = false)
+    private String tipoPerfil;
 
-    @Column(name = "satelite", nullable = false)
-    private BigDecimal satelite;
-
-    @Column(name = "pre_filtro", precision = 1)
-    private Integer preFiltro;
-
-    @Column(name = "filtro", length = 3)
-    private String filtro;
-
-    @Column(name = "parametro_filtro", precision = 2)
-    private Integer parametroFiltro;
 
     @Column(name = "data_analise", nullable = false)
     private Timestamp dataAnalise;
+
+    @Lob
+    @Column(name = "dados_json", nullable = false)
+    private String dadosJson;
 
     @ManyToOne
     @JoinColumn(name = "talhao_id_talhao")

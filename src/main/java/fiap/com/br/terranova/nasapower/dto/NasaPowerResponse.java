@@ -6,15 +6,21 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import fiap.com.br.terranova.nasapower.NasaPowerController;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
 public record NasaPowerResponse(
         Long id,
-        String dataInicio,
-        String dataFim,
-        BigDecimal elevacao,
+        LocalDate dataInicio,
+        LocalDate dataFim,
+        String parametro,
         Timestamp dataAnalise,
+        
+        @JsonRawValue
+        String dadosJson,
+        
         Long idTalhao
 ) {
     public static NasaPowerResponse fromEntity(NasaPower entity) {
@@ -22,8 +28,9 @@ public record NasaPowerResponse(
                 entity.getIdNasapower(),
                 entity.getDataInicio(),
                 entity.getDataFim(),
-                entity.getElevacao(),
+                entity.getParametro(),
                 entity.getDataAnalise(),
+                entity.getDadosJson(),
                 entity.getTalhao().getIdTalhao()
         );
     }

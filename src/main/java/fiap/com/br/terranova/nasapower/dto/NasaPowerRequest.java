@@ -2,27 +2,17 @@ package fiap.com.br.terranova.nasapower.dto;
 
 import fiap.com.br.terranova.nasapower.NasaPower;
 import fiap.com.br.terranova.talhao.Talhao;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 public record NasaPowerRequest(
-        @NotBlank
-        @Size(min = 8, max = 8)
-        @Pattern(regexp = "\\d{8}", message = "A data deve estar no formato YYYYMMDD")
-        String dataInicio,
-
-        @NotBlank
-        @Size(min = 8, max = 8)
-        @Pattern(regexp = "\\d{8}", message = "A data deve estar no formato YYYYMMDD")
-        String dataFim,
+        @NotNull
+        LocalDate dataInicio,
 
         @NotNull
-        BigDecimal elevacao,
+        LocalDate dataFim,
 
         @NotNull
         Long idTalhao
@@ -31,7 +21,8 @@ public record NasaPowerRequest(
         return NasaPower.builder()
                 .dataInicio(dataInicio)
                 .dataFim(dataFim)
-                .elevacao(elevacao)
+                .parametro("PRECTOTCORR")
+                .dadosJson("{}")
                 .dataAnalise(new Timestamp(System.currentTimeMillis()))
                 .talhao(talhao)
                 .build();

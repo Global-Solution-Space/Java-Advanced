@@ -4,15 +4,15 @@ import fiap.com.br.terranova.produtor.Produtor;
 import fiap.com.br.terranova.telefone.Telefone;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 
 public record TelefoneRequest(
         @NotBlank
-        @Size(min = 2, max = 2)
+        @Pattern(regexp = "\\d{2}", message = "O DDD deve conter exatamente 2 digitos numericos")
         String ddd,
 
         @NotBlank
-        @Size(max = 9)
+        @Pattern(regexp = "\\d{8,9}", message = "O numero deve conter de 8 a 9 digitos numericos")
         String numero,
 
         @NotNull

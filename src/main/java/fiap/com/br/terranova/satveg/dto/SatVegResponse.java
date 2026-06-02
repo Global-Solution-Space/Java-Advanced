@@ -6,28 +6,26 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import fiap.com.br.terranova.satveg.SatVegController;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
+
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
 public record SatVegResponse(
         Long id,
-        BigDecimal tipoPerfil,
-        BigDecimal satelite,
-        Integer preFiltro,
-        String filtro,
-        Integer parametroFiltro,
+        String tipoPerfil,
         Timestamp dataAnalise,
+
+        @JsonRawValue
+        String dadosJson,
+        
         Long idTalhao
 ) {
     public static SatVegResponse fromEntity(SatVeg entity) {
         return new SatVegResponse(
                 entity.getIdSatveg(),
                 entity.getTipoPerfil(),
-                entity.getSatelite(),
-                entity.getPreFiltro(),
-                entity.getFiltro(),
-                entity.getParametroFiltro(),
                 entity.getDataAnalise(),
+                entity.getDadosJson(),
                 entity.getTalhao().getIdTalhao()
         );
     }

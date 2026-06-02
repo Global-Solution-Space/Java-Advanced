@@ -1,0 +1,940 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Terra Nova API
+meta:
+  id: wrk_terranova_api
+  created: 1779315088270
+  modified: 1779315088270
+  description: "Coleção de testes para a API do Terra Nova"
+collection:
+  - name: Localizações
+    meta:
+      id: fld_localizacoes
+      sortKey: -10
+    environment:
+      path: localizacoes
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Localizações
+        meta:
+          id: req_get_all_loc
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Localização by Id
+        meta:
+          id: req_get_loc_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Localização
+        meta:
+          id: req_post_loc
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "locLatitude": -23.550520,
+                "locLongitude": -46.633309
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Localização
+        meta:
+          id: req_put_loc
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "locLatitude": -24.550520,
+                "locLongitude": -47.633309
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Localização
+        meta:
+          id: req_del_loc
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Produtores
+    meta:
+      id: fld_produtores
+      sortKey: -9
+    environment:
+      path: produtores
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Produtores
+        meta:
+          id: req_get_all_prod
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Produtor by Id
+        meta:
+          id: req_get_prod_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Produtor
+        meta:
+          id: req_post_prod
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "nome": "Enzo",
+                "email": "enzo@fiap.com",
+                "senha": "password123"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Produtor
+        meta:
+          id: req_put_prod
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "nome": "Enzo Fiap",
+                "email": "enzo.novo@fiap.com",
+                "senha": "newpassword123"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Produtor
+        meta:
+          id: req_del_prod
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Telefones
+    meta:
+      id: fld_telefones
+      sortKey: -8
+    environment:
+      path: telefones
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Telefones
+        meta:
+          id: req_get_all_tel
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Telefone by Id
+        meta:
+          id: req_get_tel_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Telefone
+        meta:
+          id: req_post_tel
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "ddd": "11",
+                "numero": "999999999",
+                "idProdutor": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Telefone
+        meta:
+          id: req_put_tel
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "ddd": "11",
+                "numero": "988888888",
+                "idProdutor": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Telefone
+        meta:
+          id: req_del_tel
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Propriedades
+    meta:
+      id: fld_propriedades
+      sortKey: -7
+    environment:
+      path: propriedades
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Propriedades
+        meta:
+          id: req_get_all_prop
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Propriedade by Id
+        meta:
+          id: req_get_prop_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Propriedade
+        meta:
+          id: req_post_prop
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "nome": "Fazenda Sol",
+                "tamanhoTotal": 250.5,
+                "idProdutor": 1,
+                "idLocalizacao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Propriedade
+        meta:
+          id: req_put_prop
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "nome": "Fazenda Nova Aurora",
+                "tamanhoTotal": 300.0,
+                "idProdutor": 1,
+                "idLocalizacao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Propriedade
+        meta:
+          id: req_del_prop
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Tipos de Plantação
+    meta:
+      id: fld_tipos_plantacao
+      sortKey: -6
+    environment:
+      path: tipos-plantacao
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Tipos
+        meta:
+          id: req_get_all_tipo
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Tipo by Id
+        meta:
+          id: req_get_tipo_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Tipo Plantação
+        meta:
+          id: req_post_tipo
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "tipoPlant": "Soja"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Tipo Plantação
+        meta:
+          id: req_put_tipo
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "tipoPlant": "Milho"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Tipo Plantação
+        meta:
+          id: req_del_tipo
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Talhões
+    meta:
+      id: fld_talhoes
+      sortKey: -5
+    environment:
+      path: talhoes
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Talhões
+        meta:
+          id: req_get_all_talhoes
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Talhão by Id
+        meta:
+          id: req_get_talhao_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Talhão
+        meta:
+          id: req_post_talhao
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "nomeTalhao": "Talhão Sul",
+                "volumArea": 120.0,
+                "idTipoPlantacao": 1,
+                "idPropriedade": 1,
+                "idLocalizacao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Talhão
+        meta:
+          id: req_put_talhao
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "nomeTalhao": "Talhão Norte Atualizado",
+                "volumArea": 130.0,
+                "idTipoPlantacao": 1,
+                "idPropriedade": 1,
+                "idLocalizacao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Talhão
+        meta:
+          id: req_del_talhao
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: SatVeg (Embrapa)
+    meta:
+      id: fld_satveg
+      sortKey: -4
+    environment:
+      path: satveg
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All SatVeg
+        meta:
+          id: req_get_all_satveg
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get SatVeg by Id
+        meta:
+          id: req_get_satveg_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post SatVeg (Processar API)
+        meta:
+          id: req_post_satveg
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "idTalhao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update SatVeg
+        meta:
+          id: req_put_satveg
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "idTalhao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete SatVeg
+        meta:
+          id: req_del_satveg
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: NasaPower (NASA)
+    meta:
+      id: fld_nasapower
+      sortKey: -3
+    environment:
+      path: nasapower
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All NasaPower
+        meta:
+          id: req_get_all_nasa
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get NasaPower by Id
+        meta:
+          id: req_get_nasa_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post NasaPower (Processar API)
+        meta:
+          id: req_post_nasa
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "dataInicio": "2023-01-01",
+                "dataFim": "2023-01-05",
+                "idTalhao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update NasaPower
+        meta:
+          id: req_put_nasa
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "dataInicio": "2023-02-01",
+                "dataFim": "2023-02-10",
+                "idTalhao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete NasaPower
+        meta:
+          id: req_del_nasa
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+  - name: Alertas Agrícolas
+    meta:
+      id: fld_alertas
+      sortKey: -2
+    environment:
+      path: alertas
+    children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Alertas
+        meta:
+          id: req_get_all_alertas
+        method: GET
+        parameters:
+          - name: page
+            value: "0"
+            disabled: false
+          - name: size
+            value: "10"
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get Alerta by Id
+        meta:
+          id: req_get_alerta_id
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Post Alerta
+        meta:
+          id: req_post_alerta
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "titulo": "Alerta de Calor",
+                "descricao": "Calor extremo nos próximos dias",
+                "nivelAlerta": "ALTO",
+                "resolvido": "N",
+                "idTalhao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Update Alerta
+        meta:
+          id: req_put_alerta
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "titulo": "Alerta de Calor Resolvido",
+                "descricao": "Temperatura normalizada",
+                "nivelAlerta": "BAIXO",
+                "resolvido": "S",
+                "idTalhao": 1
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Delete Alerta
+        meta:
+          id: req_del_alerta
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_81de29e2c22c50920d9f01344edb655ee65086e9
+    created: 1779315088280
+    modified: 1779315088280
+environments:
+  name: Base Environment
+  meta:
+    id: env_81de29e2c22c50920d9f01344edb655ee65086e9
+    created: 1779315088275
+    modified: 1779315088275
+    isPrivate: false

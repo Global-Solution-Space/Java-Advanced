@@ -1,7 +1,6 @@
 package fiap.com.br.terranova.alerta;
 
-import fiap.com.br.terranova.nasapower.NasaPower;
-import fiap.com.br.terranova.satveg.SatVeg;
+import fiap.com.br.terranova.talhao.Talhao;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,10 +38,6 @@ public class Alerta {
     private Timestamp dataAlerta;
 
     @ManyToOne
-    @JoinColumn(name = "satveg_id_satveg")
-    private SatVeg satVeg;
-
-    @ManyToOne
-    @JoinColumn(name = "nasapower_id_nasapower")
-    private NasaPower nasaPower;
+    @JoinColumn(name = "talhao_id_talhao")
+    private Talhao talhao;
 }

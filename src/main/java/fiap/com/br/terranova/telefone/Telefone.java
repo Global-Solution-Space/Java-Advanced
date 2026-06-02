@@ -26,7 +26,7 @@ public class Telefone {
     @Column(name = "numero", length = 9, nullable = false)
     private String numero;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "produtor_id_produtor")
     private Produtor produtor;
 }

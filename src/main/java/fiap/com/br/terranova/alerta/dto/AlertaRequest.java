@@ -1,8 +1,10 @@
 package fiap.com.br.terranova.alerta.dto;
 
 import fiap.com.br.terranova.alerta.Alerta;
-import fiap.com.br.terranova.nasapower.NasaPower;
-import fiap.com.br.terranova.satveg.SatVeg;
+import fiap.com.br.terranova.alerta.NivelAlerta;
+import fiap.com.br.terranova.alerta.SimNao;
+import fiap.com.br.terranova.talhao.Talhao;
+import fiap.com.br.terranova.validation.EnumValidation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,27 +22,25 @@ public record AlertaRequest(
 
         @NotBlank
         @Size(max = 20)
+        @EnumValidation(enumClass = NivelAlerta.class, message = "O nivel de alerta deve ser: BAIXO, MEDIO, ALTO ou CRITICO")
         String nivelAlerta,
 
         @NotBlank
         @Size(max = 1)
+        @EnumValidation(enumClass = SimNao.class, message = "O campo resolvido deve ser 'S' ou 'N'")
         String resolvido,
 
         @NotNull
-        Long idSatveg,
-
-        @NotNull
-        Long idNasapower
+        Long idTalhao
 ) {
-    public Alerta toEntity(SatVeg satVeg, NasaPower nasaPower) {
+    public Alerta toEntity(Talhao talhao) {
         return Alerta.builder()
                 .titulo(titulo)
                 .descricao(descricao)
                 .nivelAlerta(nivelAlerta)
                 .resolvido(resolvido)
                 .dataAlerta(new Timestamp(System.currentTimeMillis()))
-                .satVeg(satVeg)
-                .nasaPower(nasaPower)
+                .talhao(talhao)
                 .build();
     }
 }
