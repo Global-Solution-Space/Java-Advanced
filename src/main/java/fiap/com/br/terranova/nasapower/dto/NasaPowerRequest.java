@@ -22,7 +22,6 @@ public record NasaPowerRequest(
                 .dataInicio(dataInicio)
                 .dataFim(dataFim)
                 .parametro("PRECTOTCORR")
-                .dadosJson("{}")
                 .dataAnalise(new Timestamp(System.currentTimeMillis()))
                 .talhao(talhao)
                 .build();

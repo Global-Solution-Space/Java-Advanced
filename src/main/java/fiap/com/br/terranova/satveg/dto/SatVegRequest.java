@@ -13,7 +13,6 @@ public record SatVegRequest(
     public SatVeg toEntity(Talhao talhao) {
         return SatVeg.builder()
                 .tipoPerfil("ndvi")
-                .dadosJson("{}")
                 .dataAnalise(new Timestamp(System.currentTimeMillis()))
                 .talhao(talhao)
                 .build();

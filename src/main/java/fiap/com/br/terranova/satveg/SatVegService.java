@@ -1,6 +1,6 @@
 package fiap.com.br.terranova.satveg;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.integration.satveg.SatVegClient;
 import fiap.com.br.terranova.integration.satveg.SatVegDataRequest;
@@ -17,8 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -28,7 +28,6 @@ public class SatVegService {
     private final SatVegRepository repository;
     private final TalhaoRepository talhaoRepository;
     private final SatVegClient satVegClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${satveg.api.token:Bearer e97dab05-eedc-39b9-a3fd-fa83cb5fef5e}")
     private String satVegToken;
@@ -45,9 +44,9 @@ public class SatVegService {
     public SatVegResponse create(SatVegRequest request) {
         Talhao talhao = getTalhao(request.idTalhao());
         SatVeg entity = request.toEntity(talhao);
-        
-        fetchAndSetSatVegData(entity, "{}");
-        
+
+        fetchAndSetSatVegData(entity);
+
         return SatVegResponse.fromEntity(repository.save(entity));
     }
 
@@ -57,8 +56,10 @@ public class SatVegService {
         SatVeg entity = request.toEntity(getTalhao(request.idTalhao()));
         entity.setIdSatveg(id);
         entity.setDataAnalise(existingEntity.getDataAnalise());
-        
-        fetchAndSetSatVegData(entity, existingEntity.getDadosJson());
+
+        // Limpa os dados antigos e busca novos
+        entity.setDados(new ArrayList<>());
+        fetchAndSetSatVegData(entity);
 
         return SatVegResponse.fromEntity(repository.save(entity));
     }
@@ -77,27 +78,25 @@ public class SatVegService {
         return talhaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
     }
 
-    private void fetchAndSetSatVegData(SatVeg entity, String fallbackJson) {
+    private void fetchAndSetSatVegData(SatVeg entity) {
         try {
             log.info("Buscando series temporais na Embrapa SATveg para o Talhao {}", entity.getTalhao().getIdTalhao());
             SatVegDataResponse apiResponse = satVegClient.getSeries(satVegToken, buildApiRequest(entity));
 
-            Map<String, Double> serieValores = new LinkedHashMap<>();
+            List<DadoTemporal> dados = new ArrayList<>();
             for (int i = 0; i < apiResponse.listaSerie().size(); i++) {
                 String dataString = apiResponse.listaDatas().get(i);
-                // Otimização: Armazena apenas a série temporal a partir de 2020
+                // Armazena apenas a série temporal a partir de 2020
                 if (dataString != null && dataString.compareTo("2020-01-01") >= 0) {
-                    serieValores.put(dataString, apiResponse.listaSerie().get(i));
+                    dados.add(DadoTemporal.criarParaSatVeg(dataString, apiResponse.listaSerie().get(i), entity));
                 }
             }
-            
-            Map<String, Object> finalJson = Map.of("NDVI", serieValores);
-            entity.setDadosJson(objectMapper.writeValueAsString(finalJson));
-            log.info("Sucesso! O SATveg retornou {} pontos de serie temporal filtrados.", serieValores.size());
-            
+
+            entity.setDados(dados);
+            log.info("Sucesso! O SATveg retornou {} pontos de serie temporal filtrados.", dados.size());
+
         } catch (Exception e) {
             log.error("Erro ao integrar com a API da Embrapa SATveg", e);
-            entity.setDadosJson(fallbackJson);
         }
     }
 

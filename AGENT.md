@@ -22,6 +22,7 @@ fiap.com.br.terranova
 ├── exception/                  # Exceções globais (GlobalExceptionHandler)
 ├── integration/                # Clients OpenFeign (APIs Externas: NASA, SatVeg)
 ├── alerta/                     # Alertas agrícolas
+├── dadotemporal/               # Persistência relacional de séries temporais
 ├── localizacao/                # Coordenadas geográficas
 ├── nasapower/                  # Dados NASA POWER
 ├── produtor/                   # Produtores rurais
@@ -112,12 +113,9 @@ Talhao ────── (1:1) Localizacao
   │  │
   │  └──── (N:1) TipoPlantacao
   │
-  ├──── (1:N) NasaPower (herda localização do Talhão)
-  └──── (1:N) SatVeg (herda localização do Talhão)
-              │         │
-              └────┬────┘
-                   ▼
-            AlertaAgricola
+  ├──── (1:N) AlertaAgricola
+  ├──── (1:N) NasaPower ───── (1:N) DadoTemporal
+  └──── (1:N) SatVeg ──────── (1:N) DadoTemporal
 ```
 
 ### Tabela de FKs (nomes DDL)
@@ -132,8 +130,9 @@ Talhao ────── (1:1) Localizacao
 | `talhao` | `localizacao_id_localizacao` | `localizacao.id_localizacao` |
 | `nasapower` | `talhao_id_talhao` | `talhao.id_talhao` |
 | `satveg` | `talhao_id_talhao` | `talhao.id_talhao` |
-| `alerta_agricola` | `satveg_id_satveg` | `satveg.id_satveg` |
-| `alerta_agricola` | `nasapower_id_nasapower` | `nasapower.id_nasapower` |
+| `alerta_agricola` | `talhao_id_talhao` | `talhao.id_talhao` |
+| `dado_temporal` | `nasapower_id_nasapower` | `nasapower.id_nasapower` |
+| `dado_temporal` | `satveg_id_satveg` | `satveg.id_satveg` |
 
 ---
 

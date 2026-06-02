@@ -1,15 +1,16 @@
 package fiap.com.br.terranova.nasapower.dto;
 
 import fiap.com.br.terranova.nasapower.NasaPower;
-import org.springframework.hateoas.EntityModel;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import fiap.com.br.terranova.nasapower.NasaPowerController;
+import org.springframework.hateoas.EntityModel;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 public record NasaPowerResponse(
         Long id,
@@ -17,20 +18,22 @@ public record NasaPowerResponse(
         LocalDate dataFim,
         String parametro,
         Timestamp dataAnalise,
-        
-        @JsonRawValue
-        String dadosJson,
-        
+        Map<LocalDate, Double> dados,
         Long idTalhao
 ) {
     public static NasaPowerResponse fromEntity(NasaPower entity) {
+        Map<LocalDate, Double> dadosMap = new LinkedHashMap<>();
+        if (entity.getDados() != null) {
+            entity.getDados().forEach(d -> dadosMap.put(d.getDataLeitura(), d.getValor()));
+        }
+
         return new NasaPowerResponse(
                 entity.getIdNasapower(),
                 entity.getDataInicio(),
                 entity.getDataFim(),
                 entity.getParametro(),
                 entity.getDataAnalise(),
-                entity.getDadosJson(),
+                dadosMap,
                 entity.getTalhao().getIdTalhao()
         );
     }

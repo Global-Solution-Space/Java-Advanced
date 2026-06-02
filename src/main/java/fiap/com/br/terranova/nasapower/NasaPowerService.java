@@ -1,6 +1,6 @@
 package fiap.com.br.terranova.nasapower;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.integration.nasa.NasaPowerClient;
 import fiap.com.br.terranova.integration.nasa.NasaPowerDataResponse;
@@ -15,8 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -27,7 +29,6 @@ public class NasaPowerService {
     private final NasaPowerRepository repository;
     private final TalhaoRepository talhaoRepository;
     private final NasaPowerClient nasaPowerClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Page<NasaPowerResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(NasaPowerResponse::fromEntity);
@@ -42,7 +43,7 @@ public class NasaPowerService {
         Talhao talhao = getTalhao(request.idTalhao());
         NasaPower entity = request.toEntity(talhao);
 
-        fetchAndSetNasaPowerData(request, entity, "{}");
+        fetchAndSetNasaPowerData(request, entity);
 
         return NasaPowerResponse.fromEntity(repository.save(entity));
     }
@@ -53,8 +54,10 @@ public class NasaPowerService {
         NasaPower entity = request.toEntity(getTalhao(request.idTalhao()));
         entity.setIdNasapower(id);
         entity.setDataAnalise(existingEntity.getDataAnalise());
-        
-        fetchAndSetNasaPowerData(request, entity, existingEntity.getDadosJson());
+
+        // Limpa os dados antigos e busca novos
+        entity.setDados(new ArrayList<>());
+        fetchAndSetNasaPowerData(request, entity);
 
         return NasaPowerResponse.fromEntity(repository.save(entity));
     }
@@ -73,33 +76,28 @@ public class NasaPowerService {
         return talhaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
     }
 
-    private void fetchAndSetNasaPowerData(NasaPowerRequest request, NasaPower entity, String fallbackJson) {
+    private void fetchAndSetNasaPowerData(NasaPowerRequest request, NasaPower entity) {
         try {
             log.info("Buscando dados climaticos da NASA para o Talhao {}", entity.getTalhao().getIdTalhao());
             NasaPowerDataResponse apiResponse = nasaPowerClient.getDailyData(buildApiQuery(request, entity.getTalhao()));
-            
-            // Vai direto ao ponto (NullPointerException é capturado pelo catch se a API falhar estruturalmente)
+
             Map<String, Double> dadosBrutos = apiResponse.properties().parameter().get("PRECTOTCORR");
-            Map<String, Double> datasNormalizadas = new LinkedHashMap<>();
-            
+            DateTimeFormatter nasaFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            List<DadoTemporal> dados = new ArrayList<>();
+
             dadosBrutos.forEach((dataAntiga, valor) -> {
                 // Ignora o fill_value da NASA (-999)
                 if (valor != null && valor > -900.0) {
-                    String dataFormatada = (dataAntiga != null && dataAntiga.length() == 8) 
-                            ? dataAntiga.substring(0, 4) + "-" + dataAntiga.substring(4, 6) + "-" + dataAntiga.substring(6, 8)
-                            : dataAntiga;
-                    datasNormalizadas.put(dataFormatada, valor);
+                    LocalDate dataLeitura = LocalDate.parse(dataAntiga, nasaFormatter);
+                    dados.add(DadoTemporal.criarParaNasaPower(dataLeitura, valor, entity));
                 }
             });
-            
-            // Monta o dicionário final padronizado
-            Map<String, Object> jsonFinal = Map.of("PRECTOTCORR", datasNormalizadas);
-            entity.setDadosJson(objectMapper.writeValueAsString(jsonFinal));
-            log.info("Dados climaticos da NASA mapeados e filtrados com sucesso.");
-            
+
+            entity.setDados(dados);
+            log.info("Dados climaticos da NASA mapeados e filtrados com sucesso. {} registros.", dados.size());
+
         } catch (Exception e) {
             log.error("Erro ao integrar com a API da NASA ou dados estruturais ausentes.", e);
-            entity.setDadosJson(fallbackJson);
         }
     }
 

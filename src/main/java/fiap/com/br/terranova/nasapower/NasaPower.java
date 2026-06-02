@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 
 @Entity
 @Data
@@ -34,11 +37,11 @@ public class NasaPower {
     @Column(name = "data_analise", nullable = false)
     private Timestamp dataAnalise;
 
-    @Lob
-    @Column(name = "dados_json", nullable = false)
-    private String dadosJson;
-
     @ManyToOne
     @JoinColumn(name = "talhao_id_talhao")
     private Talhao talhao;
+
+    @OneToMany(mappedBy = "nasaPower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<DadoTemporal> dados = new ArrayList<>();
 }
