@@ -1,4 +1,4 @@
-INSERT INTO produtor (nome, email, senha) VALUES ('Milton e Enzo', 'contato@terranova.com', 'senha123');
+INSERT INTO produtor (nome, email, senha) VALUES ('Enzo', 'enzo@terranova.com', '123456');
 
 -- Localização 1 (Propriedade)
 INSERT INTO localizacao (loc_latitude, loc_longitude) VALUES (-23.384468, -46.737803);

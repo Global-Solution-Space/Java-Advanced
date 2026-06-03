@@ -9,13 +9,15 @@ import fiap.com.br.terranova.produtor.ProdutorController;
 public record ProdutorResponse(
         Long id,
         String nome,
-        String email
+        String email,
+        String senha
 ) {
     public static ProdutorResponse fromEntity(Produtor produtor) {
         return new ProdutorResponse(
                 produtor.getIdProdutor(),
                 produtor.getNome(),
-                produtor.getEmail()
+                produtor.getEmail(),
+                produtor.getSenha()
         );
     }
 
