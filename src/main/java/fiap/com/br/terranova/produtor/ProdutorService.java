@@ -3,6 +3,8 @@ package fiap.com.br.terranova.produtor;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.produtor.dto.ProdutorRequest;
 import fiap.com.br.terranova.produtor.dto.ProdutorResponse;
+import fiap.com.br.terranova.telefone.Telefone;
+import fiap.com.br.terranova.telefone.TelefoneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProdutorService {
 
     private final ProdutorRepository produtorRepository;
+    private final TelefoneRepository telefoneRepository;
 
     public Page<ProdutorResponse> findAll(Pageable pageable) {
         return produtorRepository.findAll(pageable).map(ProdutorResponse::fromEntity);
@@ -25,7 +28,14 @@ public class ProdutorService {
 
     @Transactional
     public ProdutorResponse create(ProdutorRequest request) {
-        return ProdutorResponse.fromEntity(produtorRepository.save(request.toEntity()));
+        Produtor produtor = produtorRepository.save(request.toEntity());
+
+        if (request.telefone() != null) {
+            Telefone telefone = request.telefone().toEntity(produtor);
+            telefoneRepository.save(telefone);
+        }
+
+        return ProdutorResponse.fromEntity(produtor);
     }
 
     @Transactional

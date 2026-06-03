@@ -9,7 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/propriedades")
@@ -22,6 +28,15 @@ public class PropriedadeController {
     public ResponseEntity<Page<EntityModel<PropriedadeResponse>>> findAll(Pageable pageable) {
         Page<EntityModel<PropriedadeResponse>> page = service.findAll(pageable).map(PropriedadeResponse::toEntityModel);
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/produtor/{idProdutor}")
+    public ResponseEntity<CollectionModel<EntityModel<PropriedadeResponse>>> findByProdutor(@PathVariable Long idProdutor) {
+        List<EntityModel<PropriedadeResponse>> models = service.findByProdutor(idProdutor).stream()
+                .map(PropriedadeResponse::toEntityModel)
+                .collect(Collectors.toList());
+        var linkSelf = linkTo(methodOn(PropriedadeController.class).findByProdutor(idProdutor)).withSelfRel();
+        return ResponseEntity.ok(CollectionModel.of(models, linkSelf));
     }
 
     @GetMapping("/{id}")

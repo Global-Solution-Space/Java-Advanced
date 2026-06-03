@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
 
 @Entity
 @Data
@@ -26,7 +25,7 @@ public class Propriedade {
     private String nome;
 
     @Column(name = "tamanho_total", nullable = false)
-    private BigDecimal tamanhoTotal;
+    private Double tamanhoTotal;
 
     @ManyToOne
     @JoinColumn(name = "produtor_id_produtor")

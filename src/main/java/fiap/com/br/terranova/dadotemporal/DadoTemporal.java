@@ -1,7 +1,7 @@
 package fiap.com.br.terranova.dadotemporal;
 
-import fiap.com.br.terranova.nasapower.NasaPower;
-import fiap.com.br.terranova.satveg.SatVeg;
+import fiap.com.br.terranova.reqapi.ReqApi;
+import fiap.com.br.terranova.talhao.Talhao;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,26 +30,10 @@ public class DadoTemporal {
     private Double valor;
 
     @ManyToOne
-    @JoinColumn(name = "satveg_id_satveg")
-    private SatVeg satveg;
+    @JoinColumn(name = "talhao_id_talhao")
+    private Talhao talhao;
 
     @ManyToOne
-    @JoinColumn(name = "nasapower_id_nasapower")
-    private NasaPower nasaPower;
-
-    public static DadoTemporal criarParaSatVeg(String dataString, Double valor, SatVeg satveg) {
-        return DadoTemporal.builder()
-                .dataLeitura(LocalDate.parse(dataString))
-                .valor(valor)
-                .satveg(satveg)
-                .build();
-    }
-
-    public static DadoTemporal criarParaNasaPower(LocalDate data, Double valor, NasaPower nasaPower) {
-        return DadoTemporal.builder()
-                .dataLeitura(data)
-                .valor(valor)
-                .nasaPower(nasaPower)
-                .build();
-    }
+    @JoinColumn(name = "req_api_id_api")
+    private ReqApi reqApi;
 }

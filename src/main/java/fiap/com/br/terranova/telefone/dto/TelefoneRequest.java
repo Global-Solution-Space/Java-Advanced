@@ -3,7 +3,6 @@ package fiap.com.br.terranova.telefone.dto;
 import fiap.com.br.terranova.produtor.Produtor;
 import fiap.com.br.terranova.telefone.Telefone;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public record TelefoneRequest(
@@ -15,7 +14,6 @@ public record TelefoneRequest(
         @Pattern(regexp = "\\d{8,9}", message = "O numero deve conter de 8 a 9 digitos numericos")
         String numero,
 
-        @NotNull
         Long idProdutor
 ) {
     public Telefone toEntity(Produtor produtor) {

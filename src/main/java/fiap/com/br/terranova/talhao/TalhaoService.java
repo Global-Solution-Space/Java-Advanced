@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,13 @@ public class TalhaoService {
 
     public Page<TalhaoResponse> findAll(Pageable pageable) {
         return talhaoRepository.findAll(pageable).map(TalhaoResponse::fromEntity);
+    }
+
+    public List<TalhaoResponse> findByProdutor(Long idProdutor) {
+        return talhaoRepository.findByPropriedadeProdutorIdProdutor(idProdutor)
+                .stream()
+                .map(TalhaoResponse::fromEntity)
+                .toList();
     }
 
     public TalhaoResponse findById(Long id) {
@@ -60,22 +68,18 @@ public class TalhaoService {
     }
 
     private Talhao findTalhaoById(Long id) {
-        return talhaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
+        return talhaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
     }
 
     private TipoPlantacao getTipoPlantacao(Long id) {
-        return tipoPlantacaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TipoPlantacao com id " + id + " nao encontrado."));
+        return tipoPlantacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("TipoPlantacao com id " + id + " nao encontrado."));
     }
 
     private Propriedade getPropriedade(Long id) {
-        return propriedadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Propriedade com id " + id + " nao encontrada."));
+        return propriedadeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Propriedade com id " + id + " nao encontrada."));
     }
 
     private Localizacao getLocalizacao(Long id) {
-        return localizacaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Localizacao com id " + id + " nao encontrada."));
+        return localizacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Localizacao com id " + id + " nao encontrada."));
     }
 }

@@ -1,7 +1,7 @@
-package fiap.com.br.terranova.nasapower;
+package fiap.com.br.terranova.reqapi;
 
-import fiap.com.br.terranova.nasapower.dto.NasaPowerRequest;
-import fiap.com.br.terranova.nasapower.dto.NasaPowerResponse;
+import fiap.com.br.terranova.reqapi.dto.ReqApiRequest;
+import fiap.com.br.terranova.reqapi.dto.ReqApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,30 +12,30 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.hateoas.EntityModel;
 
 @RestController
-@RequestMapping("/api/nasapower")
+@RequestMapping("/api/req-api")
 @RequiredArgsConstructor
-public class NasaPowerController {
+public class ReqApiController {
 
-    private final NasaPowerService service;
+    private final ReqApiService service;
 
     @GetMapping
-    public ResponseEntity<Page<EntityModel<NasaPowerResponse>>> findAll(Pageable pageable) {
-        Page<EntityModel<NasaPowerResponse>> page = service.findAll(pageable).map(NasaPowerResponse::toEntityModel);
+    public ResponseEntity<Page<EntityModel<ReqApiResponse>>> findAll(Pageable pageable) {
+        Page<EntityModel<ReqApiResponse>> page = service.findAll(pageable).map(ReqApiResponse::toEntityModel);
         return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<NasaPowerResponse>> findById(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<ReqApiResponse>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id).toEntityModel());
     }
 
     @PostMapping
-    public ResponseEntity<EntityModel<NasaPowerResponse>> create(@RequestBody @Valid NasaPowerRequest request) {
+    public ResponseEntity<EntityModel<ReqApiResponse>> create(@RequestBody @Valid ReqApiRequest request) {
         return new ResponseEntity<>(service.create(request).toEntityModel(), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<NasaPowerResponse>> update(@PathVariable Long id, @RequestBody @Valid NasaPowerRequest request) {
+    public ResponseEntity<EntityModel<ReqApiResponse>> update(@PathVariable Long id, @RequestBody @Valid ReqApiRequest request) {
         return ResponseEntity.ok(service.update(id, request).toEntityModel());
     }
 

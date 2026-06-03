@@ -20,7 +20,7 @@ public class Localizacao {
     @Column(name = "id_localizacao")
     private Long idLocalizacao;
 
-    @Column(name = "loc_latitude", precision = 8, scale = 6, nullable = false)
+    @Column(name = "loc_latitude", precision = 9, scale = 6, nullable = false)
     private BigDecimal locLatitude;
 
     @Column(name = "loc_longitude", precision = 9, scale = 6, nullable = false)

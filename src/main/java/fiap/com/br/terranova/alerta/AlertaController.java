@@ -9,7 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/alertas")
@@ -22,6 +28,15 @@ public class AlertaController {
     public ResponseEntity<Page<EntityModel<AlertaResponse>>> findAll(Pageable pageable) {
         Page<EntityModel<AlertaResponse>> page = service.findAll(pageable).map(AlertaResponse::toEntityModel);
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/produtor/{idProdutor}")
+    public ResponseEntity<CollectionModel<EntityModel<AlertaResponse>>> findByProdutor(@PathVariable Long idProdutor) {
+        List<EntityModel<AlertaResponse>> models = service.findByProdutor(idProdutor).stream()
+                .map(AlertaResponse::toEntityModel)
+                .collect(Collectors.toList());
+        var linkSelf = linkTo(methodOn(AlertaController.class).findByProdutor(idProdutor)).withSelfRel();
+        return ResponseEntity.ok(CollectionModel.of(models, linkSelf));
     }
 
     @GetMapping("/{id}")

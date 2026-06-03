@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,13 @@ public class AlertaService {
 
     public Page<AlertaResponse> findAll(Pageable pageable) {
         return alertaRepository.findAll(pageable).map(AlertaResponse::fromEntity);
+    }
+
+    public List<AlertaResponse> findByProdutor(Long idProdutor) {
+        return alertaRepository.findByTalhaoPropriedadeProdutorIdProdutor(idProdutor)
+                .stream()
+                .map(AlertaResponse::fromEntity)
+                .toList();
     }
 
     public AlertaResponse findById(Long id) {

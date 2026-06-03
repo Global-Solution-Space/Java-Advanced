@@ -9,7 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/talhoes")
@@ -22,6 +28,15 @@ public class TalhaoController {
     public ResponseEntity<Page<EntityModel<TalhaoResponse>>> findAll(Pageable pageable) {
         Page<EntityModel<TalhaoResponse>> page = service.findAll(pageable).map(TalhaoResponse::toEntityModel);
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/produtor/{idProdutor}")
+    public ResponseEntity<CollectionModel<EntityModel<TalhaoResponse>>> findByProdutor(@PathVariable Long idProdutor) {
+        List<EntityModel<TalhaoResponse>> models = service.findByProdutor(idProdutor).stream()
+                .map(TalhaoResponse::toEntityModel)
+                .collect(Collectors.toList());
+        var linkSelf = linkTo(methodOn(TalhaoController.class).findByProdutor(idProdutor)).withSelfRel();
+        return ResponseEntity.ok(CollectionModel.of(models, linkSelf));
     }
 
     @GetMapping("/{id}")

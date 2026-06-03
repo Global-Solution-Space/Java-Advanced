@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,13 @@ public class PropriedadeService {
         return propriedadeRepository.findAll(pageable).map(PropriedadeResponse::fromEntity);
     }
 
+    public List<PropriedadeResponse> findByProdutor(Long idProdutor) {
+        return propriedadeRepository.findByProdutorIdProdutor(idProdutor)
+                .stream()
+                .map(PropriedadeResponse::fromEntity)
+                .toList();
+    }
+
     public PropriedadeResponse findById(Long id) {
         return PropriedadeResponse.fromEntity(findPropriedadeById(id));
     }
@@ -33,8 +41,7 @@ public class PropriedadeService {
     public PropriedadeResponse create(PropriedadeRequest request) {
         return PropriedadeResponse.fromEntity(propriedadeRepository.save(request.toEntity(
                 getProdutor(request.idProdutor()),
-                getLocalizacao(request.idLocalizacao())
-        )));
+                getLocalizacao(request.idLocalizacao()))));
     }
 
     @Transactional
@@ -42,8 +49,7 @@ public class PropriedadeService {
         findPropriedadeById(id);
         Propriedade entity = request.toEntity(
                 getProdutor(request.idProdutor()),
-                getLocalizacao(request.idLocalizacao())
-        );
+                getLocalizacao(request.idLocalizacao()));
         entity.setIdPropriedade(id);
         return PropriedadeResponse.fromEntity(propriedadeRepository.save(entity));
     }

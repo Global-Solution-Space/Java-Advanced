@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
 
 @Entity
 @Data
@@ -27,7 +26,7 @@ public class Talhao {
     private String nomeTalhao;
 
     @Column(name = "volum_area", nullable = false)
-    private BigDecimal volumArea;
+    private Double volumArea;
 
     @ManyToOne
     @JoinColumn(name = "tipo_plantacao_id_tipo_plant")

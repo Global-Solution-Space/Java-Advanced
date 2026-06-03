@@ -21,15 +21,18 @@
 fiap.com.br.terranova
 ├── exception/                  # Exceções globais (GlobalExceptionHandler)
 ├── integration/                # Clients OpenFeign (APIs Externas: NASA, SatVeg)
+│   ├── nasa/                   # NasaPowerClient + NasaPowerDataResponse
+│   └── satveg/                 # SatVegClient + SatVegDataRequest/Response
+├── validation/                 # Validações customizadas (UniqueEmail, ValidTalhaoArea, EnumValidation)
 ├── alerta/                     # Alertas agrícolas
-├── dadotemporal/               # Persistência relacional de séries temporais
+├── dadotemporal/               # Tabela Fato — séries temporais normalizadas
 ├── localizacao/                # Coordenadas geográficas
-├── nasapower/                  # Dados NASA POWER
 ├── produtor/                   # Produtores rurais
 ├── propriedade/                # Propriedades rurais
-├── satveg/                     # Dados SatVeg (satélite)
+├── reqapi/                     # Requisições de API (substitui nasapower/ e satveg/)
 ├── talhao/                     # Talhões (parcelas de terra)
 ├── telefone/                   # Telefones dos produtores
+├── tipoapi/                    # Tipos de API (SATVEG, NASAPOWER) — seed automático
 └── tipoplantacao/              # Tipos de plantação
 ```
 
@@ -64,30 +67,38 @@ Cada pacote de domínio segue a mesma estrutura interna:
 
 #### Request (entrada)
 
-- Usa **Bean Validation** (`@NotBlank`, `@NotNull`, `@Size`, `@Email`, `@Pattern`, etc.)
+- Usa **Bean Validation** (`@NotBlank`, `@NotNull`, `@Size`, `@Email`, `@Pattern`, `@Positive`, `@DecimalMax`, etc.)
+- **Validações Customizadas:** `@UniqueEmail` (email único), `@ValidTalhaoArea` (soma de áreas), `@EnumValidation` (enum check)
 - Contém método **`toEntity(...)`** que recebe as entidades de FK já resolvidas.
-- **Não contém** lógica de montagem de APIs externas (esses conversores ficam em métodos privados no Service, ex: `buildApiQuery()`). Mantendo o DTO puramente como validador de entrada.
 - FKs são representadas como `Long idRelacao` (ID puro, não a entidade).
 
 #### Response (saída)
 
 - **Imutável** — apenas dados serializáveis
 - Contém **`static fromEntity(Entidade)`** que extrai IDs das relações
-- **Implementa HATEOAS:** Possui o método **`toEntityModel()`** que retorna um `EntityModel<T>` preenchido com links estáticos (ex: `withSelfRel()`), garantindo isolamento da lógica HATEOAS dentro do próprio DTO sem vazar entidades.
+- **Implementa HATEOAS:** Possui o método **`toEntityModel()`** que retorna um `EntityModel<T>` preenchido com links estáticos.
 
 ### Services
 
 - **`@Service` + `@RequiredArgsConstructor`** — injeção via construtor final (Lombok)
-- Transações gerenciadas por **`@Transactional`** nos métodos `create`, `update` e `delete` para garantir Data Integrity e First-Level Cache efficiency.
+- Transações gerenciadas por **`@Transactional`** nos métodos `create`, `update` e `delete`.
 - **Paginação:** métodos `findAll` retornam `Page<Response>` com `Pageable`
-- **Delete otimizado:** `repository.delete(entity)` (após validar se a entidade existe), poupando 1 query SELECT extra do Spring Data.
-- **APIs Externas:** Injeção de `OpenFeign Clients` (ex: `SatVegClient`, `NasaPowerClient`) executados durante o fluxo de `create` em caso de enriquecimento de dados dinâmico. Tratamento de exceção em integrações não devem parar o fluxo local (usar fallback).
+- **Delete otimizado:** `repository.delete(entity)` (após validar se a entidade existe).
+- **APIs Externas:** O `ReqApiService` centraliza TODA a lógica de integração com NASA POWER e SatVeg. A decisão de chamada é feita via `switch` a partir do campo `tipoApiNome` enviado pelo mobile (validado via `@EnumValidation`).
+
+### Validações Customizadas (pacote `validation/`)
+
+| Anotação | Target | Lógica |
+|----------|--------|--------|
+| `@UniqueEmail` | Campo `email` | Verifica `existsByEmail()`. Tolera PUT do próprio ID. |
+| `@ValidTalhaoArea` | Classe `TalhaoRequest` | Soma áreas dos talhões da propriedade e valida contra `tamanhoTotal`. |
+| `@EnumValidation` | Campos String | Verifica se valor está contido nos nomes do enum informado. |
 
 ### Integrações (OpenFeign)
 
 - Clientes criados como `interface` com `@FeignClient`.
-- Para métodos GET complexos, utiliza-se `@SpringQueryMap Map<String, Object>` para construir os Query Params de forma limpa.
-- Respostas da API são mapeadas em Records exclusivos da API (ex: `NasaPowerDataResponse`) aninhados para ignorar campos indesejados do JSON externo.
+- Para métodos GET complexos, utiliza-se `@SpringQueryMap Map<String, Object>`.
+- Respostas mapeadas em Records exclusivos da API.
 
 ### Controllers
 
@@ -95,8 +106,12 @@ Cada pacote de domínio segue a mesma estrutura interna:
 - **`@Valid`** em todos os `@RequestBody`
 - **`Pageable`** no endpoint de listagem (GET sem ID)
 - **HTTP Status:** `201 CREATED` no POST, `204 NO_CONTENT` no DELETE, `200 OK` nos demais
-- **Retornos HATEOAS:** Todos os retornos que antes eram DTOs diretos agora são **envelopados em `EntityModel<T>` ou `Page<EntityModel<T>>`**, acionando o `.toEntityModel()` do Response.
-- **CORS:** Liberado globalmente via classe de infraestrutura `CorsConfig` implementando `WebMvcConfigurer`.
+- **Retornos HATEOAS:** Envelopados em `EntityModel<T>` ou `Page<EntityModel<T>>`.
+- **CORS:** Liberado globalmente via `CorsConfig`.
+- **Otimização de Overfetching:** Para evitar que o Mobile baixe toda a base do sistema, existem endpoints específicos de filtragem por `idProdutor` que retornam coleções HATEOAS (`CollectionModel<EntityModel<T>>`):
+  - `GET /api/propriedades/produtor/{idProdutor}`
+  - `GET /api/talhoes/produtor/{idProdutor}`
+  - `GET /api/alertas/produtor/{idProdutor}`
 
 ---
 
@@ -114,8 +129,8 @@ Talhao ────── (1:1) Localizacao
   │  └──── (N:1) TipoPlantacao
   │
   ├──── (1:N) AlertaAgricola
-  ├──── (1:N) NasaPower ───── (1:N) DadoTemporal
-  └──── (1:N) SatVeg ──────── (1:N) DadoTemporal
+  │
+  └──── (1:N) DadoTemporal ────── (N:1) ReqApi ────── (N:1) TipoApi
 ```
 
 ### Tabela de FKs (nomes DDL)
@@ -128,11 +143,18 @@ Talhao ────── (1:1) Localizacao
 | `talhao` | `tipo_plantacao_id_tipo_plant` | `tipo_plantacao.id_tipo_plant` |
 | `talhao` | `propriedade_id_propriedade` | `propriedade.id_propriedade` |
 | `talhao` | `localizacao_id_localizacao` | `localizacao.id_localizacao` |
-| `nasapower` | `talhao_id_talhao` | `talhao.id_talhao` |
-| `satveg` | `talhao_id_talhao` | `talhao.id_talhao` |
 | `alerta_agricola` | `talhao_id_talhao` | `talhao.id_talhao` |
-| `dado_temporal` | `nasapower_id_nasapower` | `nasapower.id_nasapower` |
-| `dado_temporal` | `satveg_id_satveg` | `satveg.id_satveg` |
+| `dado_temporal` | `talhao_id_talhao` | `talhao.id_talhao` |
+| `dado_temporal` | `req_api_id_api` | `req_api.id_api` |
+| `req_api` | `tipo_api_id_tipo` | `tipo_api.id_tipo` |
+
+### Enums
+
+| Enum | Pacote | Valores |
+|------|--------|---------|
+| `NivelAlerta` | `alerta` | BAIXO, MEDIO, ALTO, CRITICO |
+| `TipoParam` | `reqapi` | NVDI, PRECTOTCORR |
+| `TipoApiEnum` | `tipoapi` | SATVEG, NASAPOWER |
 
 ---
 
@@ -156,9 +178,11 @@ Talhao ────── (1:1) Localizacao
 1. **DTOs são SEMPRE `record`** — nunca `class` com `@Data`
 2. **Entities são SEMPRE `class`** com `@Data` + `@Builder`
 3. **Nunca expor entidades JPA diretamente** nos endpoints — sempre usar Request/Response
-4. **Tratamento de Exceções:** Centralizado em `GlobalExceptionHandler`. Utilizar `@ResponseStatus` caso criar exceptions customizadas (como `ResourceNotFoundException`).
+4. **Tratamento de Exceções:** Centralizado em `GlobalExceptionHandler`.
 5. **Transações:** `@Transactional` é vital em operações de escrita nos Services.
-6. **Desacoplamento API:** As chamadas OpenFeign utilizam conversão direta em `NasaPowerDataResponse` e `SatVegDataResponse`, ignorando JSON inflado.
+6. **Tipos numéricos de área:** `Double` (não `BigDecimal`).
+7. **Campo `resolvido` do Alerta:** `Integer` (0 ou 1), mapeado como `NUMBER` no Oracle.
+8. **TipoApi:** Seed automático via `DatabaseInitializer` (`CommandLineRunner`) — NUNCA expor endpoint de escrita.
 
 ---
 

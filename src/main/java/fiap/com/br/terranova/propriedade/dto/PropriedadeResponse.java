@@ -6,12 +6,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import fiap.com.br.terranova.propriedade.PropriedadeController;
 
-import java.math.BigDecimal;
-
 public record PropriedadeResponse(
         Long id,
         String nome,
-        BigDecimal tamanhoTotal,
+        Double tamanhoTotal,
         Long idProdutor,
         String produtorNome,
         Long idLocalizacao

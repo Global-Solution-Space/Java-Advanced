@@ -6,12 +6,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import fiap.com.br.terranova.talhao.TalhaoController;
 
-import java.math.BigDecimal;
-
 public record TalhaoResponse(
         Long id,
         String nomeTalhao,
-        BigDecimal volumArea,
+        Double volumArea,
         Long idTipoPlantacao,
         String tipoPlantacaoNome,
         Long idPropriedade,

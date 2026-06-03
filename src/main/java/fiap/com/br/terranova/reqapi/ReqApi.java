@@ -1,6 +1,7 @@
-package fiap.com.br.terranova.satveg;
+package fiap.com.br.terranova.reqapi;
 
-import fiap.com.br.terranova.talhao.Talhao;
+import fiap.com.br.terranova.dadotemporal.DadoTemporal;
+import fiap.com.br.terranova.reqapi.tipoapi.TipoApi;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,33 +11,31 @@ import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "satveg")
-public class SatVeg {
+@Table(name = "req_api")
+public class ReqApi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_satveg")
-    private Long idSatveg;
+    @Column(name = "id_api")
+    private Long idApi;
 
-    @Column(name = "tipo_perfil", length = 4, nullable = false)
-    private String tipoPerfil;
-
+    @Column(name = "tipo_param", length = 15, nullable = false)
+    private String tipoParam;
 
     @Column(name = "data_analise", nullable = false)
     private Timestamp dataAnalise;
 
     @ManyToOne
-    @JoinColumn(name = "talhao_id_talhao")
-    private Talhao talhao;
+    @JoinColumn(name = "tipo_api_id_tipo")
+    private TipoApi tipoApi;
 
-    @OneToMany(mappedBy = "satveg", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(mappedBy = "reqApi", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DadoTemporal> dados = new ArrayList<>();
 }
