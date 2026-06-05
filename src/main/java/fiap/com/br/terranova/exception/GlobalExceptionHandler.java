@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,19 +37,27 @@ public class GlobalExceptionHandler {
             String path
     ) {}
 
-    // 1. Captura erros de validacao de campos (@Valid / @NotBlank / @NotNull) - 400 Bad Request
+    // Captura erros de validacao de campos (@Valid / @NotBlank / @NotNull) - 400 Bad Request
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, List<ValidationErrorDetail>>> handleValidation(MethodArgumentNotValidException exception) {
-        log.warn("Falha de validacao de entrada detectada: {} erro(s)", exception.getFieldErrorCount());
+        log.warn("Falha de validacao de entrada detectada: {} erro(s)", exception.getErrorCount());
         
-        List<ValidationErrorDetail> errors = exception.getFieldErrors().stream()
-                .map(ValidationErrorDetail::new)
-                .toList();
+        List<ValidationErrorDetail> errors = new ArrayList<>();
+        
+        // Adiciona erros de campos específicos
+        exception.getFieldErrors().forEach(error -> 
+            errors.add(new ValidationErrorDetail(error.getField(), error.getDefaultMessage()))
+        );
+        
+        // Adiciona erros globais (nível de classe, ex: @ValidTalhaoArea)
+        exception.getGlobalErrors().forEach(error -> 
+            errors.add(new ValidationErrorDetail("global", error.getDefaultMessage()))
+        );
                 
         return ResponseEntity.badRequest().body(Map.of("erros", errors));
     }
 
-    // 2. Captura recursos nao encontrados (ex: Pet ou Usuario nao existe) - 404 Not Found
+    // Captura recursos nao encontrados (ex: Pet ou Usuario nao existe) - 404 Not Found
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFound(
             ResourceNotFoundException exception, HttpServletRequest request) {
@@ -66,7 +75,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
-    // 3. Captura violacoes de regras de negocios no Service - 400 Bad Request
+    // Captura violacoes de regras de negocios no Service - 400 Bad Request
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
             IllegalArgumentException exception, HttpServletRequest request) {
@@ -84,7 +93,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    // 4. Captura erros de parsing do JSON (ex: enviar String em campo de Character) - 400 Bad Request
+    // Captura erros de parsing do JSON (ex: enviar String em campo de Character) - 400 Bad Request
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadable(
             HttpMessageNotReadableException exception, HttpServletRequest request) {
@@ -102,7 +111,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    // 5. Captura erros de consistencia de dados no banco (ex: valor grande demais, chaves duplicadas) - 400 Bad Request
+    // Captura erros de consistencia de dados no banco (ex: valor grande demais, chaves duplicadas) - 400 Bad Request
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException exception, HttpServletRequest request) {
@@ -120,7 +129,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    // 6. Captura ResponseStatusException ainda usada em servicos legados - respeita o status original
+    // Captura ResponseStatusException ainda usada em servicos legados - respeita o status original
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
             ResponseStatusException exception, HttpServletRequest request) {
@@ -139,7 +148,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(errorResponse);
     }
 
-    // 7. Captura qualquer outro erro inesperado (Fallback geral de seguranca) - 500 Internal Server Error
+    // Captura NoResourceFoundException (ex: favicon.ico nao encontrado) - 404 Not Found
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(
+            org.springframework.web.servlet.resource.NoResourceFoundException exception, HttpServletRequest request) {
+        
+        log.warn("Recurso estatico nao encontrado: {}", exception.getMessage());
+        
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    // Captura qualquer outro erro inesperado (Fallback geral de seguranca) - 500 Internal Server Error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(
             Exception exception, HttpServletRequest request) {

@@ -14,6 +14,13 @@ public class DadoTemporalService {
 
     private final DadoTemporalRepository repository;
 
+    public List<DadoTemporalResponse> findAll() {
+        return repository.findAll()
+                .stream()
+                .map(DadoTemporalResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public DadoTemporalResponse findById(Long id) {
         return repository.findById(id)
                 .map(DadoTemporalResponse::fromEntity)

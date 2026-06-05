@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 public record ReqApiRequest(
         @NotBlank
         @Size(max = 15)
-        @EnumValidation(enumClass = TipoParam.class, message = "O tipo de parametro deve ser: NVDI ou PRECTOTCORR")
+        @EnumValidation(enumClass = TipoParam.class, message = "O tipo de parametro deve ser: NDVI ou PRECTOTCORR")
         String tipoParam,
 
         @NotBlank

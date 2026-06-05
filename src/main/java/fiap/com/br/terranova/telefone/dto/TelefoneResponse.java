@@ -1,5 +1,6 @@
 package fiap.com.br.terranova.telefone.dto;
 
+import fiap.com.br.terranova.produtor.ProdutorController;
 import fiap.com.br.terranova.telefone.Telefone;
 import org.springframework.hateoas.EntityModel;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -24,6 +25,7 @@ public record TelefoneResponse(
     public EntityModel<TelefoneResponse> toEntityModel() {
         var linkSelf = linkTo(methodOn(TelefoneController.class).findById(id)).withSelfRel().withTitle("Detalhes do telefone");
         var linkAll = linkTo(methodOn(TelefoneController.class).findAll(null)).withRel("all-telefones").withTitle("Todos os telefones");
-        return EntityModel.of(this, linkSelf, linkAll);
+        var linkProdutor = linkTo(methodOn(ProdutorController.class).findById(idProdutor)).withRel("produtor").withTitle("Produtor associado");
+        return EntityModel.of(this, linkSelf, linkAll, linkProdutor);
     }
 }

@@ -49,6 +49,13 @@ public class AlertaService {
     }
 
     @Transactional
+    public AlertaResponse resolver(Long id) {
+        Alerta entity = findAlertaById(id);
+        entity.setResolvido("S");
+        return AlertaResponse.fromEntity(alertaRepository.save(entity));
+    }
+
+    @Transactional
     public void delete(Long id) {
         Alerta entity = findAlertaById(id);
         alertaRepository.delete(entity);

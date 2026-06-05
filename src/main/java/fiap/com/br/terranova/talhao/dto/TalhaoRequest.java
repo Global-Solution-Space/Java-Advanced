@@ -19,7 +19,7 @@ public record TalhaoRequest(
 
         @NotNull
         @Positive(message = "A area/volume do talhao deve ser maior que 0.")
-        @DecimalMax(value = "10000.00", message = "A area/volume do talhao não pode exceder 10000.00 hectares.")
+        @DecimalMax(value = "1000.00", message = "A area/volume do talhao não pode exceder 1000.00 hectares.")
         Double volumArea,
 
         @NotNull

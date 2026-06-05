@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 
 public record LocalizacaoRequest(
         @NotNull
-        @DecimalMin(value = "-90.0", message = "A latitude deve ser no minimo -90.0")
-        @DecimalMax(value = "90.0", message = "A latitude deve ser no maximo 90.0")
+        @DecimalMin(value = "-33.75", message = "A latitude deve ser no mínimo -33.75 (território brasileiro)")
+        @DecimalMax(value = "5.27", message = "A latitude deve ser no máximo 5.27 (território brasileiro)")
         BigDecimal locLatitude,
 
         @NotNull
-        @DecimalMin(value = "-180.0", message = "A longitude deve ser no minimo -180.0")
-        @DecimalMax(value = "180.0", message = "A longitude deve ser no maximo 180.0")
+        @DecimalMin(value = "-73.98", message = "A longitude deve ser no mínimo -73.98 (território brasileiro)")
+        @DecimalMax(value = "-34.79", message = "A longitude deve ser no máximo -34.79 (território brasileiro)")
         BigDecimal locLongitude
 ) {
     public Localizacao toEntity() {

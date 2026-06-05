@@ -1,5 +1,7 @@
 package fiap.com.br.terranova.propriedade.dto;
 
+import fiap.com.br.terranova.localizacao.LocalizacaoController;
+import fiap.com.br.terranova.produtor.ProdutorController;
 import fiap.com.br.terranova.propriedade.Propriedade;
 import org.springframework.hateoas.EntityModel;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -28,6 +30,8 @@ public record PropriedadeResponse(
     public EntityModel<PropriedadeResponse> toEntityModel() {
         var linkSelf = linkTo(methodOn(PropriedadeController.class).findById(id)).withSelfRel().withTitle("Detalhes da propriedade");
         var linkAll = linkTo(methodOn(PropriedadeController.class).findAll(null)).withRel("all-propriedades").withTitle("Todas as propriedades");
-        return EntityModel.of(this, linkSelf, linkAll);
+        var linkProdutor = linkTo(methodOn(ProdutorController.class).findById(idProdutor)).withRel("produtor").withTitle("Produtor associado");
+        var linkLocalizacao = linkTo(methodOn(LocalizacaoController.class).findById(idLocalizacao)).withRel("localizacao").withTitle("Localização associada");
+        return EntityModel.of(this, linkSelf, linkAll, linkProdutor, linkLocalizacao);
     }
 }

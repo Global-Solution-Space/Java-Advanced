@@ -10,7 +10,7 @@ collection:
   - name: Localizações
     meta:
       id: fld_localizacoes
-      sortKey: -10
+      sortKey: -80
     environment:
       path: localizacoes
     children:
@@ -18,6 +18,7 @@ collection:
         name: Get All Localizações
         meta:
           id: req_get_all_loc
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -35,9 +36,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Localização by Id
+        name: Get By Id Localização
         meta:
           id: req_get_loc_id
+          sortKey: -90
         method: GET
         settings:
           renderRequestBody: true
@@ -51,6 +53,7 @@ collection:
         name: Post Localização
         meta:
           id: req_post_loc
+          sortKey: -80
         method: POST
         body:
           mimeType: application/json
@@ -74,6 +77,7 @@ collection:
         name: Update Localização
         meta:
           id: req_put_loc
+          sortKey: -70
         method: PUT
         body:
           mimeType: application/json
@@ -97,6 +101,7 @@ collection:
         name: Delete Localização
         meta:
           id: req_del_loc
+          sortKey: -60
         method: DELETE
         settings:
           renderRequestBody: true
@@ -110,7 +115,7 @@ collection:
   - name: Produtores
     meta:
       id: fld_produtores
-      sortKey: -9
+      sortKey: -100
     environment:
       path: produtores
     children:
@@ -118,6 +123,7 @@ collection:
         name: Get All Produtores
         meta:
           id: req_get_all_prod
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -135,9 +141,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Produtor by Id
+        name: Get By Id Produtor
         meta:
           id: req_get_prod_id
+          sortKey: -90
         method: GET
         settings:
           renderRequestBody: true
@@ -151,6 +158,7 @@ collection:
         name: Post Produtor
         meta:
           id: req_post_prod
+          sortKey: -80
         method: POST
         body:
           mimeType: application/json
@@ -175,6 +183,7 @@ collection:
         name: Update Produtor
         meta:
           id: req_put_prod
+          sortKey: -70
         method: PUT
         body:
           mimeType: application/json
@@ -199,6 +208,7 @@ collection:
         name: Delete Produtor
         meta:
           id: req_del_prod
+          sortKey: -60
         method: DELETE
         settings:
           renderRequestBody: true
@@ -212,7 +222,7 @@ collection:
   - name: Telefones
     meta:
       id: fld_telefones
-      sortKey: -8
+      sortKey: -90
     environment:
       path: telefones
     children:
@@ -220,6 +230,7 @@ collection:
         name: Get All Telefones
         meta:
           id: req_get_all_tel
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -237,9 +248,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Telefone by Id
+        name: Get By Id Telefone
         meta:
           id: req_get_tel_id
+          sortKey: -90
         method: GET
         settings:
           renderRequestBody: true
@@ -253,6 +265,7 @@ collection:
         name: Post Telefone
         meta:
           id: req_post_tel
+          sortKey: -80
         method: POST
         body:
           mimeType: application/json
@@ -277,6 +290,7 @@ collection:
         name: Update Telefone
         meta:
           id: req_put_tel
+          sortKey: -70
         method: PUT
         body:
           mimeType: application/json
@@ -301,6 +315,7 @@ collection:
         name: Delete Telefone
         meta:
           id: req_del_tel
+          sortKey: -60
         method: DELETE
         settings:
           renderRequestBody: true
@@ -314,7 +329,7 @@ collection:
   - name: Propriedades
     meta:
       id: fld_propriedades
-      sortKey: -7
+      sortKey: -70
     environment:
       path: propriedades
     children:
@@ -322,6 +337,7 @@ collection:
         name: Get All Propriedades
         meta:
           id: req_get_all_prop
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -338,10 +354,25 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/produtor/1
+        name: Get By Produtor Propriedades
+        meta:
+          id: req_get_prop_produtor
+          sortKey: -90
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Propriedade by Id
+        name: Get By Id Propriedade
         meta:
           id: req_get_prop_id
+          sortKey: -80
         method: GET
         settings:
           renderRequestBody: true
@@ -355,6 +386,7 @@ collection:
         name: Post Propriedade
         meta:
           id: req_post_prop
+          sortKey: -70
         method: POST
         body:
           mimeType: application/json
@@ -380,6 +412,7 @@ collection:
         name: Update Propriedade
         meta:
           id: req_put_prop
+          sortKey: -60
         method: PUT
         body:
           mimeType: application/json
@@ -405,6 +438,7 @@ collection:
         name: Delete Propriedade
         meta:
           id: req_del_prop
+          sortKey: -50
         method: DELETE
         settings:
           renderRequestBody: true
@@ -418,7 +452,7 @@ collection:
   - name: Tipos de Plantação
     meta:
       id: fld_tipos_plantacao
-      sortKey: -6
+      sortKey: -50
     environment:
       path: tipos-plantacao
     children:
@@ -426,6 +460,7 @@ collection:
         name: Get All Tipos
         meta:
           id: req_get_all_tipo
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -443,9 +478,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Tipo by Id
+        name: Get By Id Tipo de Plantação
         meta:
           id: req_get_tipo_id
+          sortKey: -90
         method: GET
         settings:
           renderRequestBody: true
@@ -456,9 +492,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}
-        name: Post Tipo Plantação
+        name: Post Tipo de Plantação
         meta:
           id: req_post_tipo
+          sortKey: -80
         method: POST
         body:
           mimeType: application/json
@@ -478,9 +515,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Update Tipo Plantação
+        name: Update Tipo de Plantação
         meta:
           id: req_put_tipo
+          sortKey: -70
         method: PUT
         body:
           mimeType: application/json
@@ -500,9 +538,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Delete Tipo Plantação
+        name: Delete Tipo de Plantação
         meta:
           id: req_del_tipo
+          sortKey: -60
         method: DELETE
         settings:
           renderRequestBody: true
@@ -516,7 +555,7 @@ collection:
   - name: Talhões
     meta:
       id: fld_talhoes
-      sortKey: -5
+      sortKey: -60
     environment:
       path: talhoes
     children:
@@ -524,6 +563,7 @@ collection:
         name: Get All Talhões
         meta:
           id: req_get_all_talhoes
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -540,10 +580,25 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/produtor/1
+        name: Get By Produtor Talhões
+        meta:
+          id: req_get_talhao_produtor
+          sortKey: -90
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Talhão by Id
+        name: Get By Id Talhão
         meta:
           id: req_get_talhao_id
+          sortKey: -80
         method: GET
         settings:
           renderRequestBody: true
@@ -557,6 +612,7 @@ collection:
         name: Post Talhão
         meta:
           id: req_post_talhao
+          sortKey: -70
         method: POST
         body:
           mimeType: application/json
@@ -583,6 +639,7 @@ collection:
         name: Update Talhão
         meta:
           id: req_put_talhao
+          sortKey: -60
         method: PUT
         body:
           mimeType: application/json
@@ -609,6 +666,7 @@ collection:
         name: Delete Talhão
         meta:
           id: req_del_talhao
+          sortKey: -50
         method: DELETE
         settings:
           renderRequestBody: true
@@ -619,17 +677,18 @@ collection:
             store: true
           rebuildPath: true
 
-  - name: SatVeg (Embrapa)
+  - name: ReqApi (Integração Externa)
     meta:
-      id: fld_satveg
-      sortKey: -4
+      id: fld_reqapi
+      sortKey: -40
     environment:
-      path: satveg
+      path: req-api
     children:
       - url: http://localhost:8080/api/{{ _.path }}
-        name: Get All SatVeg
+        name: Get All ReqApi
         meta:
-          id: req_get_all_satveg
+          id: req_get_all_reqapi
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -647,9 +706,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get SatVeg by Id
+        name: Get By Id ReqApi
         meta:
-          id: req_get_satveg_id
+          id: req_get_reqapi_id
+          sortKey: -90
         method: GET
         settings:
           renderRequestBody: true
@@ -660,14 +720,17 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}
-        name: Post SatVeg (Processar API)
+        name: Post ReqApi
         meta:
-          id: req_post_satveg
+          id: req_post_reqapi
+          sortKey: -80
         method: POST
         body:
           mimeType: application/json
           text: |-
             {
+                "tipoParam": "PRECTOTCORR",
+                "tipoApiNome": "NASAPOWER",
                 "idTalhao": 1
             }
         headers:
@@ -682,14 +745,17 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Update SatVeg
+        name: Update ReqApi
         meta:
-          id: req_put_satveg
+          id: req_put_reqapi
+          sortKey: -70
         method: PUT
         body:
           mimeType: application/json
           text: |-
             {
+                "tipoParam": "PRECTOTCORR",
+                "tipoApiNome": "SATVEG",
                 "idTalhao": 1
             }
         headers:
@@ -704,9 +770,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Delete SatVeg
+        name: Delete ReqApi
         meta:
-          id: req_del_satveg
+          id: req_del_reqapi
+          sortKey: -60
         method: DELETE
         settings:
           renderRequestBody: true
@@ -717,37 +784,18 @@ collection:
             store: true
           rebuildPath: true
 
-  - name: NasaPower (NASA)
+  - name: Dado Temporal
     meta:
-      id: fld_nasapower
-      sortKey: -3
+      id: fld_dados_temporais
+      sortKey: -30
     environment:
-      path: nasapower
+      path: dados-temporais
     children:
-      - url: http://localhost:8080/api/{{ _.path }}
-        name: Get All NasaPower
+      - url: http://localhost:8080/api/{{ _.path }}/talhao/1
+        name: Get By Talhão Dados Temporais
         meta:
-          id: req_get_all_nasa
-        method: GET
-        parameters:
-          - name: page
-            value: "0"
-            disabled: false
-          - name: size
-            value: "10"
-            disabled: false
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get NasaPower by Id
-        meta:
-          id: req_get_nasa_id
+          id: req_get_dados_by_talhao
+          sortKey: -100
         method: GET
         settings:
           renderRequestBody: true
@@ -757,22 +805,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:8080/api/{{ _.path }}
-        name: Post NasaPower (Processar API)
+      - url: http://localhost:8080/api/{{ _.path }}/1
+        name: Get By Id Dado Temporal
         meta:
-          id: req_post_nasa
-        method: POST
-        body:
-          mimeType: application/json
-          text: |-
-            {
-                "dataInicio": "2023-01-01",
-                "dataFim": "2023-01-05",
-                "idTalhao": 1
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
+          id: req_get_dado_id
+          sortKey: -90
+        method: GET
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -781,35 +819,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Update NasaPower
+      - url: http://localhost:8080/api/{{ _.path }}/req-api/1
+        name: Get By ReqApi Dados Temporais
         meta:
-          id: req_put_nasa
-        method: PUT
-        body:
-          mimeType: application/json
-          text: |-
-            {
-                "dataInicio": "2023-02-01",
-                "dataFim": "2023-02-10",
-                "idTalhao": 1
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Delete NasaPower
-        meta:
-          id: req_del_nasa
-        method: DELETE
+          id: req_get_dados_by_reqapi
+          sortKey: -80
+        method: GET
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -822,14 +837,15 @@ collection:
   - name: Alertas Agrícolas
     meta:
       id: fld_alertas
-      sortKey: -2
+      sortKey: -20
     environment:
       path: alertas
     children:
       - url: http://localhost:8080/api/{{ _.path }}
-        name: Get All Alertas
+        name: Get All Alertas Agrícolas
         meta:
           id: req_get_all_alertas
+          sortKey: -100
         method: GET
         parameters:
           - name: page
@@ -846,10 +862,25 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/produtor/1
+        name: Get By Produtor Alertas Agrícolas
+        meta:
+          id: req_get_alerta_produtor
+          sortKey: -90
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Get Alerta by Id
+        name: Get By Id Alerta Agrícola
         meta:
           id: req_get_alerta_id
+          sortKey: -80
         method: GET
         settings:
           renderRequestBody: true
@@ -860,9 +891,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}
-        name: Post Alerta
+        name: Post Alerta Agrícola
         meta:
           id: req_post_alerta
+          sortKey: -70
         method: POST
         body:
           mimeType: application/json
@@ -886,9 +918,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Update Alerta
+        name: Update Alerta Agrícola
         meta:
           id: req_put_alerta
+          sortKey: -60
         method: PUT
         body:
           mimeType: application/json
@@ -912,9 +945,10 @@ collection:
             store: true
           rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Delete Alerta
+        name: Delete Alerta Agrícola
         meta:
           id: req_del_alerta
+          sortKey: -50
         method: DELETE
         settings:
           renderRequestBody: true

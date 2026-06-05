@@ -1,5 +1,8 @@
 package fiap.com.br.terranova.reqapi;
 
+import fiap.com.br.terranova.alerta.Alerta;
+import fiap.com.br.terranova.alerta.AlertaRepository;
+import fiap.com.br.terranova.alerta.NivelAlerta;
 import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 import fiap.com.br.terranova.dadotemporal.DadoTemporalRepository;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
@@ -22,9 +25,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +42,7 @@ public class ReqApiService {
     private final TipoApiRepository tipoApiRepository;
     private final TalhaoRepository talhaoRepository;
     private final DadoTemporalRepository dadoTemporalRepository;
+    private final AlertaRepository alertaRepository;
     private final NasaPowerClient nasaPowerClient;
     private final SatVegClient satVegClient;
 
@@ -49,6 +55,12 @@ public class ReqApiService {
 
     public ReqApiResponse findById(Long id) {
         return ReqApiResponse.fromEntity(findReqApiById(id));
+    }
+
+    public List<ReqApiResponse> findByTalhaoId(Long idTalhao) {
+        return reqApiRepository.findByTalhao_IdTalhao(idTalhao).stream()
+                .map(ReqApiResponse::fromEntity)
+                .toList();
     }
 
     @Transactional
@@ -64,27 +76,10 @@ public class ReqApiService {
         dadoTemporalRepository.saveAll(dados);
         entity.setDados(dados);
 
+        // Analisa dados recentes e cria alertas automaticamente, se necessario
+        analisarEGerarAlertas(dados, tipoApi, talhao);
+
         return ReqApiResponse.fromEntity(entity);
-    }
-
-    @Transactional
-    public ReqApiResponse update(Long id, ReqApiRequest request) {
-        ReqApi existingEntity = findReqApiById(id);
-        TipoApi tipoApi = getTipoApiByName(request.tipoApiNome());
-        Talhao talhao = getTalhao(request.idTalhao());
-
-        // Limpa dados temporais antigos
-        dadoTemporalRepository.deleteAll(existingEntity.getDados());
-
-        existingEntity.setTipoParam(request.tipoParam());
-        existingEntity.setTipoApi(tipoApi);
-
-        // Busca dados novos da API externa
-        List<DadoTemporal> dados = fetchDadosExternos(tipoApi.getTipoApi(), request, talhao, existingEntity);
-        dadoTemporalRepository.saveAll(dados);
-        existingEntity.setDados(dados);
-
-        return ReqApiResponse.fromEntity(reqApiRepository.save(existingEntity));
     }
 
     @Transactional
@@ -108,8 +103,57 @@ public class ReqApiService {
                 .orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
     }
 
-    // INTEGRAÇÃO EXTERNA
+    // ANALISE E ALERTAS
+    private void analisarEGerarAlertas(List<DadoTemporal> dados, TipoApi tipoApi, Talhao talhao) {
+        if (dados == null || dados.isEmpty()) return;
 
+        // Ordena por data decrescente (mais recentes primeiro)
+        List<DadoTemporal> dadosOrdenados = dados.stream()
+                .sorted(Comparator.comparing(DadoTemporal::getDataLeitura).reversed())
+                .toList();
+
+        String tipo = tipoApi.getTipoApi().toLowerCase();
+
+        if ("nasapower".equals(tipo)) {
+            double chuvaAcumulada15dias = dadosOrdenados.stream().mapToDouble(DadoTemporal::getValor).sum();
+            double chuvaAcumulada3dias = dadosOrdenados.stream().limit(3).mapToDouble(DadoTemporal::getValor).sum();
+
+            if (chuvaAcumulada3dias > 80.0) {
+                criarAlerta(talhao, "Risco de Alagamento (NASA)", "Chuva extrema detectada nos últimos 3 dias (" + String.format("%.1f", chuvaAcumulada3dias) + " mm). Risco de erosão e asfixia radicular.", NivelAlerta.ALTO);
+            } else if (chuvaAcumulada15dias < 10.0) {
+                criarAlerta(talhao, "Seca Severa (NASA)", "Apenas " + String.format("%.1f", chuvaAcumulada15dias) + " mm de chuva acumulada nos últimos 15 dias.", NivelAlerta.CRITICO);
+            } else if (chuvaAcumulada15dias < 25.0) {
+                criarAlerta(talhao, "Estresse Hídrico (NASA)", "Baixa precipitação acumulada nos últimos 15 dias (" + String.format("%.1f", chuvaAcumulada15dias) + " mm).", NivelAlerta.MEDIO);
+            }
+
+        } else if ("satveg".equals(tipo)) {
+            DadoTemporal ultimoDado = dadosOrdenados.get(0);
+            if (ultimoDado.getValor() < 0.2) {
+                criarAlerta(talhao, "Anomalia Vegetativa Severa (SATVEG)", "O NDVI atual caiu para " + String.format("%.2f", ultimoDado.getValor()) + ". Possível falha na cultura ou solo exposto.", NivelAlerta.CRITICO);
+            } else if (ultimoDado.getValor() < 0.4) {
+                criarAlerta(talhao, "Baixo Vigor Vegetativo (SATVEG)", "O NDVI atual é de " + String.format("%.2f", ultimoDado.getValor()) + ". Monitore para pragas, doenças ou estresse nutricional.", NivelAlerta.MEDIO);
+            }
+        }
+    }
+
+    private void criarAlerta(Talhao talhao, String titulo, String descricao, NivelAlerta nivel) {
+        if (alertaRepository.existsByTalhaoAndTituloAndResolvido(talhao, titulo, "N")) {
+            log.info("Alerta automático '{}' para o Talhão {} ignorado (já existe um ativo).", titulo, talhao.getIdTalhao());
+            return;
+        }
+        Alerta alerta = Alerta.builder()
+                .titulo(titulo)
+                .descricao(descricao)
+                .nivelAlerta(nivel.name())
+                .resolvido("N")
+                .dataAlerta(new Timestamp(System.currentTimeMillis()))
+                .talhao(talhao)
+                .build();
+        alertaRepository.save(alerta);
+        log.info("Novo alerta gerado automaticamente: {} para o Talhão {}", titulo, talhao.getIdTalhao());
+    }
+
+    // INTEGRAÇÃO EXTERNA
     private List<DadoTemporal> fetchDadosExternos(String tipoApiNome, ReqApiRequest request, Talhao talhao, ReqApi reqApi) {
         String tipo = tipoApiNome.toUpperCase();
         return switch (tipo) {
@@ -224,7 +268,7 @@ public class ReqApiService {
 
     private SatVegDataRequest buildSatVegRequest(Talhao talhao) {
         return SatVegDataRequest.builder()
-                .tipoPerfil("NVDI")
+                .tipoPerfil("ndvi")
                 .satelite("comb")
                 .preFiltro(3)
                 .filtro("sav")
