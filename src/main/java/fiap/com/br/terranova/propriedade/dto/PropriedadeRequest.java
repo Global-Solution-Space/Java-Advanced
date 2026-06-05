@@ -3,12 +3,14 @@ package fiap.com.br.terranova.propriedade.dto;
 import fiap.com.br.terranova.localizacao.Localizacao;
 import fiap.com.br.terranova.produtor.Produtor;
 import fiap.com.br.terranova.propriedade.Propriedade;
+import fiap.com.br.terranova.validation.ValidPropriedadeArea;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+@ValidPropriedadeArea
 public record PropriedadeRequest(
         @NotBlank
         @Size(max = 30)

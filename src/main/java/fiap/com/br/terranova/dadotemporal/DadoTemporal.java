@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Data
 @Builder
@@ -31,9 +33,11 @@ public class DadoTemporal {
 
     @ManyToOne
     @JoinColumn(name = "talhao_id_talhao")
+    @JsonBackReference(value = "talhao-dado")
     private Talhao talhao;
 
     @ManyToOne
     @JoinColumn(name = "req_api_id_api")
+    @JsonBackReference(value = "reqapi-dado")
     private ReqApi reqApi;
 }

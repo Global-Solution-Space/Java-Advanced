@@ -23,17 +23,18 @@ public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, St
             return true;
         }
 
-        @SuppressWarnings("unchecked")
-        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        
-        if (pathVariables != null && pathVariables.containsKey("id")) {
-            try {
-                Long id = Long.parseLong(pathVariables.get("id"));
-                Produtor existing = produtorRepository.findById(id).orElse(null);
-                if (existing != null && existing.getEmail().equalsIgnoreCase(email)) {
-                    return true; // O e-mail pertence ao proprio produtor sendo atualizado
-                }
-            } catch (NumberFormatException ignored) {}
+        Object attr = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        if (attr instanceof Map) {
+            Map<?, ?> pathVariables = (Map<?, ?>) attr;
+            if (pathVariables.containsKey("id")) {
+                try {
+                    Long id = Long.parseLong(String.valueOf(pathVariables.get("id")));
+                    Produtor existing = produtorRepository.findById(id).orElse(null);
+                    if (existing != null && existing.getEmail().equalsIgnoreCase(email)) {
+                        return true; // O e-mail pertence ao proprio produtor sendo atualizado
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
         }
         
         return !produtorRepository.existsByEmail(email);

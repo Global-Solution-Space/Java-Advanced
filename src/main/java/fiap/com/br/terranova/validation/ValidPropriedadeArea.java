@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ValidTalhaoAreaValidator.class)
-public @interface ValidTalhaoArea {
-    String message() default "A soma das areas dos talhões excede o tamanho total da propriedade.";
+@Constraint(validatedBy = ValidPropriedadeAreaValidator.class)
+public @interface ValidPropriedadeArea {
+    String message() default "O tamanho da propriedade não pode ser menor do que a soma das áreas de seus talhões existentes.";
 
     Class<?>[] groups() default {};
 

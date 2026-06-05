@@ -12,6 +12,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Data
 @Builder
@@ -33,6 +35,7 @@ public class ReqApi {
 
     @ManyToOne
     @JoinColumn(name = "tipo_api_id_tipo")
+    @JsonBackReference(value="tipoapi-reqapi")
     private TipoApi tipoApi;
 
     @Builder.Default

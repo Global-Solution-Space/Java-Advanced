@@ -1,12 +1,14 @@
 package fiap.com.br.terranova.localizacao.dto;
 
 import fiap.com.br.terranova.localizacao.Localizacao;
+import fiap.com.br.terranova.validation.BrasilCoordenadas;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
+@BrasilCoordenadas
 public record LocalizacaoRequest(
         @NotNull
         @DecimalMin(value = "-34.00", message = "A latitude deve ser no mínimo -34.00")

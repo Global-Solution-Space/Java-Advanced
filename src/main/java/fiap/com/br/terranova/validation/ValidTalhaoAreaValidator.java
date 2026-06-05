@@ -35,22 +35,28 @@ public class ValidTalhaoAreaValidator implements ConstraintValidator<ValidTalhao
         }
 
         Long talhaoIdExcluido = null;
-        @SuppressWarnings("unchecked")
-        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        if (pathVariables != null && pathVariables.containsKey("id")) {
-            try {
-                talhaoIdExcluido = Long.parseLong(pathVariables.get("id"));
-            } catch (NumberFormatException ignored) {}
+        Object attr = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        if (attr instanceof Map) {
+            Map<?, ?> pathVariables = (Map<?, ?>) attr;
+            if (pathVariables.containsKey("id")) {
+                try {
+                    talhaoIdExcluido = Long.parseLong(String.valueOf(pathVariables.get("id")));
+                } catch (NumberFormatException ignored) {}
+            }
         }
 
         final Long finalIdExcluido = talhaoIdExcluido;
         double totalTalhoesArea = talhaoRepository.findByPropriedadeIdPropriedade(propriedade.getIdPropriedade())
                 .stream()
-                .filter(t -> finalIdExcluido == null || !t.getIdTalhao().equals(finalIdExcluido))
+                .filter(t -> !t.getIdTalhao().equals(finalIdExcluido))
                 .map(Talhao::getVolumArea)
                 .filter(Objects::nonNull)
                 .mapToDouble(Double::doubleValue)
                 .sum();
+
+        if (propriedade.getTamanhoTotal() == null) {
+            return true;
+        }
 
         double novoTotal = totalTalhoesArea + dto.volumArea();
 
