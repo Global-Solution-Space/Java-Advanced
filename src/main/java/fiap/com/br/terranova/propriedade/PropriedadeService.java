@@ -61,17 +61,14 @@ public class PropriedadeService {
     }
 
     private Propriedade findPropriedadeById(Long id) {
-        return propriedadeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Propriedade com id " + id + " nao encontrada."));
+        return propriedadeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Propriedade com id " + id + " não encontrada."));
     }
 
     private Produtor getProdutor(Long id) {
-        return produtorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produtor com id " + id + " nao encontrado."));
+        return produtorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produtor com id " + id + " não encontrado."));
     }
 
     private Localizacao getLocalizacao(Long id) {
-        return localizacaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Localizacao com id " + id + " nao encontrada."));
+        return localizacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Localização com id " + id + " não encontrada."));
     }
 }

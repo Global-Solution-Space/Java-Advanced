@@ -75,4 +75,10 @@ public class AlertaController {
     public ResponseEntity<EntityModel<AlertaResponse>> resolver(@PathVariable Long id) {
         return ResponseEntity.ok(service.resolver(id).toEntityModel());
     }
+
+    @Operation(summary = "Reabrir Alerta", description = "Marca o alerta como não resolvido sem necessitar do payload completo.")
+    @PatchMapping("/{id}/reabrir")
+    public ResponseEntity<EntityModel<AlertaResponse>> reabrir(@PathVariable Long id) {
+        return ResponseEntity.ok(service.reabrir(id).toEntityModel());
+    }
 }

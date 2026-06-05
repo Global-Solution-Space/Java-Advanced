@@ -46,12 +46,10 @@ public class TelefoneService {
     }
 
     private Telefone findTelefoneById(Long id) {
-        return telefoneRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Telefone com id " + id + " nao encontrado."));
+        return telefoneRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Telefone com id " + id + " não encontrado."));
     }
 
     private Produtor getProdutor(Long id) {
-        return produtorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produtor com id " + id + " nao encontrado."));
+        return produtorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produtor com id " + id + " não encontrado."));
     }
 }

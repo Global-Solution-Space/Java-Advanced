@@ -29,10 +29,8 @@ public record ReqApiResponse(
     }
 
     public EntityModel<ReqApiResponse> toEntityModel() {
-        var linkSelf = linkTo(methodOn(ReqApiController.class).findById(id)).withSelfRel()
-                .withTitle("Detalhes da requisicao");
-        var linkAll = linkTo(methodOn(ReqApiController.class).findAll(null)).withRel("all-req-api")
-                .withTitle("Todas as requisicoes");
+        var linkSelf = linkTo(methodOn(ReqApiController.class).findById(id)).withSelfRel().withTitle("Detalhes da requisicao");
+        var linkAll = linkTo(methodOn(ReqApiController.class).findAll(null)).withRel("all-req-api").withTitle("Todas as requisicoes");
         return EntityModel.of(this, linkSelf, linkAll);
     }
 }

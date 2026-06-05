@@ -53,7 +53,6 @@ public class ProdutorService {
     }
 
     private Produtor findProdutorById(Long id) {
-        return produtorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Produtor com id " + id + " nao encontrado."));
+        return produtorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produtor com id " + id + " não encontrado."));
     }
 }

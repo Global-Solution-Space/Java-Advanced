@@ -43,7 +43,6 @@ public class TipoPlantacaoService {
     }
 
     private TipoPlantacao findTipoPlantacaoById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("TipoPlantacao com id " + id + " nao encontrado."));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("TipoPlantacao com id " + id + " não encontrado."));
     }
 }

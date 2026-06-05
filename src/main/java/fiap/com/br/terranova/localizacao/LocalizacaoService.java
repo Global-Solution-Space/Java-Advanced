@@ -43,7 +43,6 @@ public class LocalizacaoService {
     }
 
     private Localizacao findLocalizacaoById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Localizacao com id " + id + " nao encontrada."));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Localização com id " + id + " não encontrada."));
     }
 }

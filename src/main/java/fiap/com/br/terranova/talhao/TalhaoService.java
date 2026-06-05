@@ -68,18 +68,18 @@ public class TalhaoService {
     }
 
     private Talhao findTalhaoById(Long id) {
-        return talhaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
+        return talhaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Talhão com id " + id + " não encontrado."));
     }
 
     private TipoPlantacao getTipoPlantacao(Long id) {
-        return tipoPlantacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("TipoPlantacao com id " + id + " nao encontrado."));
+        return tipoPlantacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tipo Plantacão com id " + id + " não encontrado."));
     }
 
     private Propriedade getPropriedade(Long id) {
-        return propriedadeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Propriedade com id " + id + " nao encontrada."));
+        return propriedadeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Propriedade com id " + id + " não encontrada."));
     }
 
     private Localizacao getLocalizacao(Long id) {
-        return localizacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Localizacao com id " + id + " nao encontrada."));
+        return localizacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Localização com id " + id + " não encontrada."));
     }
 }

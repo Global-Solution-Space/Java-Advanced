@@ -41,29 +41,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, List<ValidationErrorDetail>>> handleValidation(MethodArgumentNotValidException exception) {
         log.warn("Falha de validacao de entrada detectada: {} erro(s)", exception.getErrorCount());
-        
+
         List<ValidationErrorDetail> errors = new ArrayList<>();
-        
+
         // Adiciona erros de campos específicos
-        exception.getFieldErrors().forEach(error -> 
-            errors.add(new ValidationErrorDetail(error.getField(), error.getDefaultMessage()))
-        );
-        
+        exception.getFieldErrors().forEach(error -> errors.add(new ValidationErrorDetail(error.getField(), error.getDefaultMessage())));
+
         // Adiciona erros globais (nível de classe, ex: @ValidTalhaoArea)
-        exception.getGlobalErrors().forEach(error -> 
-            errors.add(new ValidationErrorDetail("global", error.getDefaultMessage()))
-        );
-                
+        exception.getGlobalErrors().forEach(error -> errors.add(new ValidationErrorDetail("global", error.getDefaultMessage())));
+
         return ResponseEntity.badRequest().body(Map.of("erros", errors));
     }
 
-    // Captura recursos nao encontrados (ex: Pet ou Usuario nao existe) - 404 Not Found
+    // Captura recursos não encontrados (ex: Pet ou Usuario não existe) - 404 Not Found
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFound(
             ResourceNotFoundException exception, HttpServletRequest request) {
-        
-        log.warn("Recurso nao encontrado: {}", exception.getMessage());
-        
+
+        log.warn("Recurso não encontrado: {}", exception.getMessage());
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 HttpStatus.NOT_FOUND.value(),
@@ -71,7 +67,7 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
@@ -79,9 +75,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
             IllegalArgumentException exception, HttpServletRequest request) {
-        
+
         log.warn("Violacao de regra de negocio: {}", exception.getMessage());
-        
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -89,7 +85,7 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -97,9 +93,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadable(
             HttpMessageNotReadableException exception, HttpServletRequest request) {
-        
+
         log.warn("JSON com formato ou tipos incorretos: {}", exception.getMessage());
-        
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -107,7 +103,7 @@ public class GlobalExceptionHandler {
                 "Erro na leitura dos dados. Por favor, verifique se os tipos de dados enviados no JSON estao corretos (ex: campos numericos, datas ou caracteres unicos).",
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -115,17 +111,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
             DataIntegrityViolationException exception, HttpServletRequest request) {
-        
+
         log.error("Erro de consistencia/integridade no banco de dados", exception);
-        
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
-                "Erro de integridade de dados. Por favor, certifique-se de que os valores enviados nao ultrapassam o limite de caracteres permitido ou violam chaves unicas.",
+                "Erro de integridade de dados. Por favor, certifique-se de que os valores enviados não ultrapassam o limite de caracteres permitido ou violam chaves unicas.",
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -133,10 +129,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
             ResponseStatusException exception, HttpServletRequest request) {
-        
+
         HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
         log.warn("ResponseStatusException capturada: {} - {}", status, exception.getReason());
-        
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 status.value(),
@@ -144,17 +140,17 @@ public class GlobalExceptionHandler {
                 exception.getReason() != null ? exception.getReason() : "Erro desconhecido.",
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(status).body(errorResponse);
     }
 
-    // Captura NoResourceFoundException (ex: favicon.ico nao encontrado) - 404 Not Found
+    // Captura NoResourceFoundException (ex: favicon.ico não encontrado) - 404 Not Found
     @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNoResourceFound(
             org.springframework.web.servlet.resource.NoResourceFoundException exception, HttpServletRequest request) {
-        
-        log.warn("Recurso estatico nao encontrado: {}", exception.getMessage());
-        
+
+        log.warn("Recurso estatico não encontrado: {}", exception.getMessage());
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 HttpStatus.NOT_FOUND.value(),
@@ -162,7 +158,7 @@ public class GlobalExceptionHandler {
                 exception.getMessage(),
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
@@ -170,9 +166,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(
             Exception exception, HttpServletRequest request) {
-        
+
         log.error("Erro inesperado capturado no handler global", exception);
-        
+
         ApiErrorResponse errorResponse = new ApiErrorResponse(
                 Instant.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -180,7 +176,7 @@ public class GlobalExceptionHandler {
                 "Ocorreu um erro interno inesperado no servidor. Por favor, tente novamente mais tarde.",
                 request.getRequestURI()
         );
-        
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }

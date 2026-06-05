@@ -24,7 +24,7 @@ public class DadoTemporalService {
     public DadoTemporalResponse findById(Long id) {
         return repository.findById(id)
                 .map(DadoTemporalResponse::fromEntity)
-                .orElseThrow(() -> new ResourceNotFoundException("Dado temporal com id " + id + " nao encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Dado temporal com id " + id + " não encontrado"));
     }
 
     public List<DadoTemporalResponse> findByTalhao(Long idTalhao) {

@@ -1,8 +1,6 @@
 package fiap.com.br.terranova.reqapi;
 
-import fiap.com.br.terranova.alerta.Alerta;
-import fiap.com.br.terranova.alerta.AlertaRepository;
-import fiap.com.br.terranova.alerta.NivelAlerta;
+import fiap.com.br.terranova.alerta.AlertaService;
 import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 import fiap.com.br.terranova.dadotemporal.DadoTemporalRepository;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
@@ -25,11 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +38,7 @@ public class ReqApiService {
     private final TipoApiRepository tipoApiRepository;
     private final TalhaoRepository talhaoRepository;
     private final DadoTemporalRepository dadoTemporalRepository;
-    private final AlertaRepository alertaRepository;
+    private final AlertaService alertaService;
     private final NasaPowerClient nasaPowerClient;
     private final SatVegClient satVegClient;
 
@@ -76,8 +72,8 @@ public class ReqApiService {
         dadoTemporalRepository.saveAll(dados);
         entity.setDados(dados);
 
-        // Analisa dados recentes e cria alertas automaticamente, se necessario
-        analisarEGerarAlertas(dados, tipoApi, talhao);
+        // Delega análise histórica ao AlertaService (consulta o banco com janela temporal correta)
+        alertaService.analisarEGerarAlertas(talhao, tipoApi.getTipoApi());
 
         return ReqApiResponse.fromEntity(entity);
     }
@@ -90,67 +86,17 @@ public class ReqApiService {
 
     private ReqApi findReqApiById(Long id) {
         return reqApiRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("ReqApi com id " + id + " nao encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("ReqApi com id " + id + " não encontrada."));
     }
 
     private TipoApi getTipoApiByName(String nome) {
         return tipoApiRepository.findByTipoApi(nome)
-                .orElseThrow(() -> new ResourceNotFoundException("TipoApi " + nome + " nao encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("TipoApi " + nome + " não encontrado."));
     }
 
     private Talhao getTalhao(Long id) {
         return talhaoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " nao encontrado."));
-    }
-
-    // ANALISE E ALERTAS
-    private void analisarEGerarAlertas(List<DadoTemporal> dados, TipoApi tipoApi, Talhao talhao) {
-        if (dados == null || dados.isEmpty()) return;
-
-        // Ordena por data decrescente (mais recentes primeiro)
-        List<DadoTemporal> dadosOrdenados = dados.stream()
-                .sorted(Comparator.comparing(DadoTemporal::getDataLeitura).reversed())
-                .toList();
-
-        String tipo = tipoApi.getTipoApi().toLowerCase();
-
-        if ("nasapower".equals(tipo)) {
-            double chuvaAcumulada15dias = dadosOrdenados.stream().mapToDouble(DadoTemporal::getValor).sum();
-            double chuvaAcumulada3dias = dadosOrdenados.stream().limit(3).mapToDouble(DadoTemporal::getValor).sum();
-
-            if (chuvaAcumulada3dias > 80.0) {
-                criarAlerta(talhao, "Risco de Alagamento (NASA)", "Chuva extrema detectada nos últimos 3 dias (" + String.format("%.1f", chuvaAcumulada3dias) + " mm). Risco de erosão e asfixia radicular.", NivelAlerta.ALTO);
-            } else if (chuvaAcumulada15dias < 10.0) {
-                criarAlerta(talhao, "Seca Severa (NASA)", "Apenas " + String.format("%.1f", chuvaAcumulada15dias) + " mm de chuva acumulada nos últimos 15 dias.", NivelAlerta.CRITICO);
-            } else if (chuvaAcumulada15dias < 25.0) {
-                criarAlerta(talhao, "Estresse Hídrico (NASA)", "Baixa precipitação acumulada nos últimos 15 dias (" + String.format("%.1f", chuvaAcumulada15dias) + " mm).", NivelAlerta.MEDIO);
-            }
-
-        } else if ("satveg".equals(tipo)) {
-            DadoTemporal ultimoDado = dadosOrdenados.get(0);
-            if (ultimoDado.getValor() < 0.2) {
-                criarAlerta(talhao, "Anomalia Vegetativa Severa (SATVEG)", "O NDVI atual caiu para " + String.format("%.2f", ultimoDado.getValor()) + ". Possível falha na cultura ou solo exposto.", NivelAlerta.CRITICO);
-            } else if (ultimoDado.getValor() < 0.4) {
-                criarAlerta(talhao, "Baixo Vigor Vegetativo (SATVEG)", "O NDVI atual é de " + String.format("%.2f", ultimoDado.getValor()) + ". Monitore para pragas, doenças ou estresse nutricional.", NivelAlerta.MEDIO);
-            }
-        }
-    }
-
-    private void criarAlerta(Talhao talhao, String titulo, String descricao, NivelAlerta nivel) {
-        if (alertaRepository.existsByTalhaoAndTituloAndResolvido(talhao, titulo, "N")) {
-            log.info("Alerta automático '{}' para o Talhão {} ignorado (já existe um ativo).", titulo, talhao.getIdTalhao());
-            return;
-        }
-        Alerta alerta = Alerta.builder()
-                .titulo(titulo)
-                .descricao(descricao)
-                .nivelAlerta(nivel.name())
-                .resolvido("N")
-                .dataAlerta(new Timestamp(System.currentTimeMillis()))
-                .talhao(talhao)
-                .build();
-        alertaRepository.save(alerta);
-        log.info("Novo alerta gerado automaticamente: {} para o Talhão {}", titulo, talhao.getIdTalhao());
+                .orElseThrow(() -> new ResourceNotFoundException("Talhao com id " + id + " não encontrado."));
     }
 
     // INTEGRAÇÃO EXTERNA
@@ -159,7 +105,7 @@ public class ReqApiService {
         return switch (tipo) {
             case "NASAPOWER" -> fetchNasaPowerData(talhao, reqApi);
             case "SATVEG" -> fetchSatVegData(talhao, reqApi);
-            default -> throw new IllegalArgumentException("Tipo de API nao suportado: " + tipo);
+            default -> throw new IllegalArgumentException("Tipo de API não suportado: " + tipo);
         };
     }
 
@@ -226,7 +172,7 @@ public class ReqApiService {
 
         } catch (feign.FeignException.BadRequest e) {
             log.error("Erro 400 ao integrar com a API da Embrapa SATveg", e);
-            throw new IllegalArgumentException("Erro na integracao com SATveg: " + extractDetail(e.contentUTF8()));
+            throw new IllegalArgumentException("Erro na integracao com SATveg: " + extractDetail(e.contentUTF8()) + " (Verifique se a coordenada informada não cai no oceano ou em países vizinhos).");
         } catch (feign.FeignException e) {
             log.error("Erro na API da Embrapa SATveg", e);
             throw new IllegalArgumentException("Falha na integracao com SATveg. Status: " + e.status());
@@ -237,7 +183,6 @@ public class ReqApiService {
     }
 
     // BUILDERS
-
     private String extractDetail(String json) {
         try {
             if (json != null && json.contains("\"detail\":\"")) {
@@ -245,7 +190,7 @@ public class ReqApiService {
                 int end = json.indexOf("\"", start);
                 return json.substring(start, end);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) { }
         return "Coordenadas ou parametros invalidos.";
     }
 
