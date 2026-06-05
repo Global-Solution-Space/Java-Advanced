@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface AlertaRepository extends JpaRepository<Alerta, Long> {
     List<Alerta> findByTalhaoPropriedadeProdutorIdProdutor(Long idProdutor);
+    List<Alerta> findByTalhaoIdTalhao(Long idTalhao);
     boolean existsByTalhaoAndTituloAndResolvido(Talhao talhao, String titulo, String resolvido);
 }

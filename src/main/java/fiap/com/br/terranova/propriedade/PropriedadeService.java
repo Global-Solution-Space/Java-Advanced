@@ -7,6 +7,9 @@ import fiap.com.br.terranova.produtor.Produtor;
 import fiap.com.br.terranova.produtor.ProdutorRepository;
 import fiap.com.br.terranova.propriedade.dto.PropriedadeRequest;
 import fiap.com.br.terranova.propriedade.dto.PropriedadeResponse;
+import fiap.com.br.terranova.talhao.Talhao;
+import fiap.com.br.terranova.talhao.TalhaoRepository;
+import fiap.com.br.terranova.talhao.TalhaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +24,8 @@ public class PropriedadeService {
     private final PropriedadeRepository propriedadeRepository;
     private final ProdutorRepository produtorRepository;
     private final LocalizacaoRepository localizacaoRepository;
+    private final TalhaoRepository talhaoRepository;
+    private final TalhaoService talhaoService;
 
     public Page<PropriedadeResponse> findAll(Pageable pageable) {
         return propriedadeRepository.findAll(pageable).map(PropriedadeResponse::fromEntity);
@@ -57,6 +62,13 @@ public class PropriedadeService {
     @Transactional
     public void delete(Long id) {
         Propriedade entity = findPropriedadeById(id);
+        
+        // Exclusão em Cascata
+        List<Talhao> talhoes = talhaoRepository.findByPropriedadeIdPropriedade(id);
+        for (Talhao t : talhoes) {
+            talhaoService.delete(t.getIdTalhao());
+        }
+        
         propriedadeRepository.delete(entity);
     }
 

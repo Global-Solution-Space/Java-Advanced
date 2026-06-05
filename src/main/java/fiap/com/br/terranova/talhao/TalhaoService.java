@@ -7,6 +7,10 @@ import fiap.com.br.terranova.propriedade.Propriedade;
 import fiap.com.br.terranova.propriedade.PropriedadeRepository;
 import fiap.com.br.terranova.talhao.dto.TalhaoRequest;
 import fiap.com.br.terranova.talhao.dto.TalhaoResponse;
+import fiap.com.br.terranova.alerta.Alerta;
+import fiap.com.br.terranova.alerta.AlertaRepository;
+import fiap.com.br.terranova.dadotemporal.DadoTemporal;
+import fiap.com.br.terranova.dadotemporal.DadoTemporalRepository;
 import fiap.com.br.terranova.tipoplantacao.TipoPlantacao;
 import fiap.com.br.terranova.tipoplantacao.TipoPlantacaoRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ public class TalhaoService {
     private final TipoPlantacaoRepository tipoPlantacaoRepository;
     private final PropriedadeRepository propriedadeRepository;
     private final LocalizacaoRepository localizacaoRepository;
+    private final AlertaRepository alertaRepository;
+    private final DadoTemporalRepository dadoTemporalRepository;
 
     public Page<TalhaoResponse> findAll(Pageable pageable) {
         return talhaoRepository.findAll(pageable).map(TalhaoResponse::fromEntity);
@@ -64,6 +70,14 @@ public class TalhaoService {
     @Transactional
     public void delete(Long id) {
         Talhao entity = findTalhaoById(id);
+        
+        // Exclusão em Cascata
+        List<Alerta> alertas = alertaRepository.findByTalhaoIdTalhao(id);
+        alertaRepository.deleteAll(alertas);
+        
+        List<DadoTemporal> dados = dadoTemporalRepository.findByTalhaoIdTalhao(id);
+        dadoTemporalRepository.deleteAll(dados);
+
         talhaoRepository.delete(entity);
     }
 

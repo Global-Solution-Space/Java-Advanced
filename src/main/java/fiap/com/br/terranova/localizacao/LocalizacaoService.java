@@ -25,7 +25,10 @@ public class LocalizacaoService {
 
     @Transactional
     public LocalizacaoResponse create(LocalizacaoRequest request) {
-        return LocalizacaoResponse.fromEntity(repository.save(request.toEntity()));
+        // Verifica se a localização já existe no banco de dados para evitar duplicidade
+        return repository.findByLocLatitudeAndLocLongitude(request.locLatitude(), request.locLongitude())
+                .map(LocalizacaoResponse::fromEntity)
+                .orElseGet(() -> LocalizacaoResponse.fromEntity(repository.save(request.toEntity())));
     }
 
     @Transactional
