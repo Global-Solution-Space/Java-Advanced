@@ -75,7 +75,7 @@ public class TalhaoService {
         List<Alerta> alertas = alertaRepository.findByTalhaoIdTalhao(id);
         alertaRepository.deleteAll(alertas);
         
-        List<DadoTemporal> dados = dadoTemporalRepository.findByTalhaoIdTalhao(id);
+        List<DadoTemporal> dados = dadoTemporalRepository.findAllByTalhaoIdTalhao(id);
         dadoTemporalRepository.deleteAll(dados);
 
         talhaoRepository.delete(entity);

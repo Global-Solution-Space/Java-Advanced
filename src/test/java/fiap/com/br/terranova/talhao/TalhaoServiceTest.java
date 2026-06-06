@@ -192,7 +192,7 @@ class TalhaoServiceTest {
         List<DadoTemporal> mockDados = List.of(new DadoTemporal());
         
         when(alertaRepository.findByTalhaoIdTalhao(10L)).thenReturn(mockAlertas);
-        when(dadoTemporalRepository.findByTalhaoIdTalhao(10L)).thenReturn(mockDados);
+        when(dadoTemporalRepository.findAllByTalhaoIdTalhao(10L)).thenReturn(mockDados);
 
         service.delete(10L);
 

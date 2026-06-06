@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,17 +29,13 @@ public class DadoTemporalService {
                 .orElseThrow(() -> new ResourceNotFoundException("Dado temporal com id " + id + " não encontrado"));
     }
 
-    public List<DadoTemporalResponse> findByTalhao(Long idTalhao) {
-        return repository.findByTalhaoIdTalhao(idTalhao)
-                .stream()
-                .map(DadoTemporalResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<DadoTemporalResponse> findByTalhao(Long idTalhao, Pageable pageable) {
+        return repository.findByTalhaoIdTalhao(idTalhao, pageable)
+                .map(DadoTemporalResponse::fromEntity);
     }
 
-    public List<DadoTemporalResponse> findByReqApi(Long idReqApi) {
-        return repository.findByReqApiIdApi(idReqApi)
-                .stream()
-                .map(DadoTemporalResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<DadoTemporalResponse> findByReqApi(Long idReqApi, Pageable pageable) {
+        return repository.findByReqApiIdApi(idReqApi, pageable)
+                .map(DadoTemporalResponse::fromEntity);
     }
 }

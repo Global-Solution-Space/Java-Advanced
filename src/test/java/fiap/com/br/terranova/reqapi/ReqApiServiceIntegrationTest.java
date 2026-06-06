@@ -136,12 +136,12 @@ class ReqApiServiceIntegrationTest {
     void shouldFindReqApisByTalhaoId() {
         TipoApi tipo = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
         ReqApi reqApi = ReqApi.builder().idApi(10L).tipoParam("PRECTOTCORR").tipoApi(tipo).build();
-        when(reqApiRepository.findByTalhao_IdTalhao(1L)).thenReturn(List.of(reqApi));
+        when(reqApiRepository.findByTalhao_IdTalhao(eq(1L), any(org.springframework.data.domain.Pageable.class))).thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(reqApi)));
 
-        List<ReqApiResponse> list = service.findByTalhaoId(1L);
+        org.springframework.data.domain.Page<ReqApiResponse> list = service.findByTalhaoId(1L, org.springframework.data.domain.Pageable.unpaged());
 
-        assertEquals(1, list.size());
-        assertEquals(10L, list.get(0).id());
+        assertEquals(1, list.getContent().size());
+        assertEquals(10L, list.getContent().get(0).id());
     }
 
     @Test

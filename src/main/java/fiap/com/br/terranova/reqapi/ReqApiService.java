@@ -38,10 +38,9 @@ public class ReqApiService {
         return ReqApiResponse.fromEntity(findReqApiById(id));
     }
 
-    public List<ReqApiResponse> findByTalhaoId(Long idTalhao) {
-        return reqApiRepository.findByTalhao_IdTalhao(idTalhao).stream()
-                .map(ReqApiResponse::fromEntity)
-                .toList();
+    public Page<ReqApiResponse> findByTalhaoId(Long idTalhao, Pageable pageable) {
+        return reqApiRepository.findByTalhao_IdTalhao(idTalhao, pageable)
+                .map(ReqApiResponse::fromEntity);
     }
 
     @Transactional

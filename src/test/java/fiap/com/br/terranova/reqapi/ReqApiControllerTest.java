@@ -109,12 +109,12 @@ class ReqApiControllerTest {
     @Test
     void shouldFindReqApisByTalhaoId() throws Exception {
         ReqApiResponse response = new ReqApiResponse(10L, "SATVEG", "NDVI", new Timestamp(System.currentTimeMillis()), 2L, 50);
-        when(service.findByTalhaoId(1L)).thenReturn(List.of(response));
+        Page<ReqApiResponse> page = new PageImpl<>(List.of(response), org.springframework.data.domain.PageRequest.of(0, 10), 1);
+        when(service.findByTalhaoId(eq(1L), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/req-api/talhao/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].tipoApiNome").value("SATVEG"))
-                .andExpect(jsonPath("$.links[0].rel").value("self"));
+                .andExpect(jsonPath("$.content[0].tipoApiNome").value("SATVEG"));
     }
 
     @Test

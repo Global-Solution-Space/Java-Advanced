@@ -32,8 +32,8 @@ public record DadoTemporalResponse(
 
     public EntityModel<DadoTemporalResponse> toEntityModel() {
         var linkSelf = linkTo(methodOn(DadoTemporalController.class).findById(idDado)).withSelfRel().withTitle("Detalhes do dado temporal");
-        var linkTalhao = linkTo(methodOn(DadoTemporalController.class).findByTalhao(idTalhao)).withRel("dados-talhao").withTitle("Todos os dados do talhão");
-        var linkReqApi = linkTo(methodOn(DadoTemporalController.class).findByReqApi(idReqApi)).withRel("dados-reqapi").withTitle("Todos os dados desta requisição");
+        var linkTalhao = linkTo(methodOn(DadoTemporalController.class).findByTalhao(idTalhao, null)).withRel("dados-talhao").withTitle("Todos os dados do talhão");
+        var linkReqApi = linkTo(methodOn(DadoTemporalController.class).findByReqApi(idReqApi, null)).withRel("dados-reqapi").withTitle("Todos os dados desta requisição");
         return EntityModel.of(this, linkSelf, linkTalhao, linkReqApi);
     }
 }

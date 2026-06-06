@@ -4,6 +4,10 @@ import fiap.com.br.terranova.dadotemporal.dto.DadoTemporalResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,23 +47,25 @@ public class DadoTemporalController {
 
     @Operation(summary = "Buscar por Talhão", description = "Retorna os registros associados ao ID do talhão.")
     @GetMapping("/talhao/{idTalhao}")
-    public ResponseEntity<CollectionModel<EntityModel<DadoTemporalResponse>>> findByTalhao(@PathVariable Long idTalhao) {
-        List<EntityModel<DadoTemporalResponse>> models = service.findByTalhao(idTalhao).stream()
-                .map(DadoTemporalResponse::toEntityModel)
-                .collect(Collectors.toList());
+    public ResponseEntity<Page<EntityModel<DadoTemporalResponse>>> findByTalhao(
+            @PathVariable Long idTalhao,
+            @PageableDefault(size = 100, sort = "idDado", direction = Sort.Direction.DESC) Pageable pageable) {
         
-        var linkSelf = linkTo(methodOn(DadoTemporalController.class).findByTalhao(idTalhao)).withSelfRel();
-        return ResponseEntity.ok(CollectionModel.of(models, linkSelf));
+        Page<EntityModel<DadoTemporalResponse>> page = service.findByTalhao(idTalhao, pageable)
+                .map(DadoTemporalResponse::toEntityModel);
+        
+        return ResponseEntity.ok(page);
     }
 
     @Operation(summary = "Buscar por Integração", description = "Retorna os registros de dados temporais associados a uma requisição de API externa.")
     @GetMapping("/req-api/{idReqApi}")
-    public ResponseEntity<CollectionModel<EntityModel<DadoTemporalResponse>>> findByReqApi(@PathVariable Long idReqApi) {
-        List<EntityModel<DadoTemporalResponse>> models = service.findByReqApi(idReqApi).stream()
-                .map(DadoTemporalResponse::toEntityModel)
-                .collect(Collectors.toList());
+    public ResponseEntity<Page<EntityModel<DadoTemporalResponse>>> findByReqApi(
+            @PathVariable Long idReqApi,
+            @PageableDefault(size = 100, sort = "idDado", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        Page<EntityModel<DadoTemporalResponse>> page = service.findByReqApi(idReqApi, pageable)
+                .map(DadoTemporalResponse::toEntityModel);
                 
-        var linkSelf = linkTo(methodOn(DadoTemporalController.class).findByReqApi(idReqApi)).withSelfRel();
-        return ResponseEntity.ok(CollectionModel.of(models, linkSelf));
+        return ResponseEntity.ok(page);
     }
 }

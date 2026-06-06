@@ -5,11 +5,11 @@ import fiap.com.br.terranova.reqapi.dto.ReqApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/req-api")
@@ -44,13 +41,14 @@ public class ReqApiController {
 
     @Operation(summary = "Buscar por Talhão", description = "Retorna o histórico de requisições de um Talhão específico.")
     @GetMapping("/talhao/{idTalhao}")
-    public ResponseEntity<CollectionModel<EntityModel<ReqApiResponse>>> findByTalhao(@PathVariable Long idTalhao) {
-        List<EntityModel<ReqApiResponse>> models = service.findByTalhaoId(idTalhao).stream()
-                .map(ReqApiResponse::toEntityModel)
-                .toList();
+    public ResponseEntity<Page<EntityModel<ReqApiResponse>>> findByTalhao(
+            @PathVariable Long idTalhao,
+            @PageableDefault(size = 50, sort = "idApi", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        Page<EntityModel<ReqApiResponse>> page = service.findByTalhaoId(idTalhao, pageable)
+                .map(ReqApiResponse::toEntityModel);
 
-        var linkSelf = linkTo(methodOn(ReqApiController.class).findByTalhao(idTalhao)).withSelfRel();
-        return ResponseEntity.ok(CollectionModel.of(models, linkSelf));
+        return ResponseEntity.ok(page);
     }
 
     @Operation(summary = "Cadastrar", description = "Cadastra um novo registro no sistema.")

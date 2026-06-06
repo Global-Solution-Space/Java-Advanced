@@ -13,6 +13,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,6 +39,7 @@ class DadoTemporalControllerTest {
         MockitoAnnotations.openMocks(this);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
     }
 
@@ -81,29 +87,39 @@ class DadoTemporalControllerTest {
     @Test
     void shouldFindDadosTemporaisByTalhao() throws Exception {
         DadoTemporalResponse response = createResponse();
-        when(service.findByTalhao(1L)).thenReturn(List.of(response));
+        Page<DadoTemporalResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 10), 1);
+        when(service.findByTalhao(eq(1L), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/dados-temporais/talhao/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].idTalhao").value(1))
-                .andExpect(jsonPath("$.content[0].tipoApiNome").value("SATVEG"))
-                .andExpect(jsonPath("$.links[0].rel").value("self"));
+                .andExpect(jsonPath("$.content[0].tipoApiNome").value("SATVEG"));
 
-        verify(service, times(1)).findByTalhao(1L);
+        verify(service, times(1)).findByTalhao(eq(1L), any(Pageable.class));
     }
 
     @Test
     void shouldFindDadosTemporaisByReqApi() throws Exception {
         DadoTemporalResponse response = createResponse();
-        when(service.findByReqApi(10L)).thenReturn(List.of(response));
+        Page<DadoTemporalResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 10), 1);
+        when(service.findByReqApi(eq(10L), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/dados-temporais/req-api/10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].idReqApi").value(10))
-                .andExpect(jsonPath("$.content[0].tipoParam").value("NDVI"))
-                .andExpect(jsonPath("$.links[0].rel").value("self"));
+                .andExpect(jsonPath("$.content[0].tipoParam").value("NDVI"));
 
-        verify(service, times(1)).findByReqApi(10L);
+        verify(service, times(1)).findByReqApi(eq(10L), any(Pageable.class));
+    }
+
+    @Test
+    void shouldPrintJson() throws Exception {
+        DadoTemporalResponse response = createResponse();
+        Page<DadoTemporalResponse> page = new PageImpl<>(List.of(response), PageRequest.of(0, 10), 1);
+        when(service.findByTalhao(eq(999L), any(Pageable.class))).thenReturn(page);
+
+        var result = mockMvc.perform(get("/api/dados-temporais/talhao/999")).andReturn();
+        System.out.println("====== JSON OUTPUT ======\n" + result.getResponse().getContentAsString() + "\n=========================");
     }
 
     private DadoTemporalResponse createResponse() {

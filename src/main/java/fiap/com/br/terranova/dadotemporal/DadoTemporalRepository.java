@@ -5,11 +5,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface DadoTemporalRepository extends JpaRepository<DadoTemporal, Long> {
-    List<DadoTemporal> findByTalhaoIdTalhao(Long idTalhao);
-    List<DadoTemporal> findByReqApiIdApi(Long idApi);
+    Page<DadoTemporal> findByTalhaoIdTalhao(Long idTalhao, Pageable pageable);
+    List<DadoTemporal> findAllByTalhaoIdTalhao(Long idTalhao);
+    Page<DadoTemporal> findByReqApiIdApi(Long idApi, Pageable pageable);
 
     @Query("""
             SELECT d FROM DadoTemporal d

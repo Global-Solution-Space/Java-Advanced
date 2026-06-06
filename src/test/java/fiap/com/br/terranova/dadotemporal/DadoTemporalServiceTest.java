@@ -14,6 +14,9 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -121,16 +124,16 @@ class DadoTemporalServiceTest {
         DadoTemporal dado1 = DadoTemporal.builder().idDado(1L).talhao(talhao).reqApi(reqApi).valor(10.0).build();
         DadoTemporal dado2 = DadoTemporal.builder().idDado(2L).talhao(talhao).reqApi(reqApi).valor(15.0).build();
 
-        when(repository.findByTalhaoIdTalhao(2L)).thenReturn(List.of(dado1, dado2));
+        when(repository.findByTalhaoIdTalhao(eq(2L), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(dado1, dado2)));
 
         // Act
-        List<DadoTemporalResponse> responses = service.findByTalhao(2L);
+        Page<DadoTemporalResponse> responses = service.findByTalhao(2L, Pageable.unpaged());
 
         // Assert
-        assertEquals(2, responses.size());
-        assertEquals(1L, responses.get(0).idDado());
-        assertEquals(2L, responses.get(1).idDado());
-        verify(repository, times(1)).findByTalhaoIdTalhao(2L);
+        assertEquals(2, responses.getContent().size());
+        assertEquals(1L, responses.getContent().get(0).idDado());
+        assertEquals(2L, responses.getContent().get(1).idDado());
+        verify(repository, times(1)).findByTalhaoIdTalhao(eq(2L), any(Pageable.class));
     }
 
     @Test
@@ -148,14 +151,14 @@ class DadoTemporalServiceTest {
                 .valor(0.62)
                 .build();
 
-        when(repository.findByReqApiIdApi(20L)).thenReturn(List.of(dado));
+        when(repository.findByReqApiIdApi(eq(20L), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(dado)));
 
-        List<DadoTemporalResponse> responses = service.findByReqApi(20L);
+        Page<DadoTemporalResponse> responses = service.findByReqApi(20L, Pageable.unpaged());
 
-        assertEquals(1, responses.size());
-        assertEquals(3L, responses.get(0).idDado());
-        assertEquals(20L, responses.get(0).idReqApi());
-        assertEquals("SATVEG", responses.get(0).tipoApiNome());
-        verify(repository, times(1)).findByReqApiIdApi(20L);
+        assertEquals(1, responses.getContent().size());
+        assertEquals(3L, responses.getContent().get(0).idDado());
+        assertEquals(20L, responses.getContent().get(0).idReqApi());
+        assertEquals("SATVEG", responses.getContent().get(0).tipoApiNome());
+        verify(repository, times(1)).findByReqApiIdApi(eq(20L), any(Pageable.class));
     }
 }
