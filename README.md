@@ -83,7 +83,11 @@ Abaixo está o mapeamento detalhado dos principais pacotes do sistema, destacand
 src/main/java/fiap/com/br/terranova/
 ├── config/                  # Swagger, CORS, inicializador de seed
 ├── exception/               # GlobalExceptionHandler e respostas de erro
-├── integration/             # Clients OpenFeign (NasaPowerClient, SatVegClient)
+├── integration/             # Orquestração e integração externa com NASA POWER e SATVeg
+│   ├── DadoTemporalIntegrationService.java # Direciona a integração conforme tipo de API
+│   ├── FeignErrorUtil.java                 # Extração padronizada de detalhes de erro Feign
+│   ├── nasa/                               # NasaPowerClient, NasaPowerDataResponse, NasaPowerIntegrationService
+│   └── satveg/                             # SatVegClient, SatVegDataRequest, SatVegDataResponse, SatVegIntegrationService
 │
 ├── produtor/                # Pacote de Domínio: Produtor
 │   ├── dto/                 # ProdutorRequest, ProdutorResponse
@@ -140,7 +144,7 @@ src/main/java/fiap/com/br/terranova/
 │   ├── ReqApi.java          # Entidade JPA
 │   ├── ReqApiController.java
 │   ├── ReqApiRepository.java
-│   └── ReqApiService.java
+│   └── ReqApiService.java     # Orquestra a requisição e delega a integração externa
 │
 ├── dadotemporal/            # Pacote de Domínio: Séries temporais persistidas
 │   ├── dto/                 # DadoTemporalResponse
@@ -180,8 +184,8 @@ src/main/java/fiap/com/br/terranova/
 
 **Padrões Arquiteturais e Design Patterns Implementados:**
 - **DTO Pattern (Record):** Separa os objetos de transferência da camada de apresentação das Entidades JPA (segurança e flexibilidade).
-- **Facade / Adapter Pattern (Integration):** Os FeignClients mascaram a complexidade das APIs externas (NASA/SATVeg) entregando respostas tipadas.
-- **Controller-Service-Repository:** Divisão clássica de responsabilidades. Os controllers apenas recebem requisições e formatam o HATEOAS, deixando a regra de negócio robusta encapsulada nas Services (`@Transactional`).
+- **Facade / Adapter Pattern (Integration):** `DadoTemporalIntegrationService`, `NasaPowerIntegrationService` e `SatVegIntegrationService` isolam os detalhes das APIs externas e entregam dados temporais prontos para persistência.
+- **Controller-Service-Repository:** Divisão clássica de responsabilidades. Os controllers recebem requisições e formatam HATEOAS, os services orquestram casos de uso, e os repositories concentram o acesso a dados.
 - **Global Error Handling:** Captura unificada de erros (`@ControllerAdvice`), padronizando o formato das respostas (`400`, `404`, `500`) e mapeando violações do Bean Validation (`@Valid`).
 
 ### 🎓 Detalhes Acadêmicos de Tecnologias Avançadas
@@ -192,7 +196,7 @@ Para resolver isso, adotamos `@JsonBackReference` no lado filho (`DadoTemporal` 
 
 #### 2. Spring Cloud OpenFeign (Declarative Web Client)
 Em vez de utilizar classes imperativas como `RestTemplate` ou `WebClient` — que exigem configurações manuais de headers, tratamento de string e conversão manual de objetos —, implementamos o **OpenFeign**. 
-Apenas declaramos interfaces Java anotadas com `@FeignClient` e mapeamos os endpoints da NASA POWER e do Embrapa SATVeg como se fossem métodos Java locais. O Spring cria a implementação do cliente HTTP dinamicamente em tempo de execução, reduzindo em 90% o código boilerplate de integração externa.
+Apenas declaramos interfaces Java anotadas com `@FeignClient` e mapeamos os endpoints da NASA POWER e da Embrapa SATVeg como métodos Java locais. A montagem de query, request externo, tratamento de erro Feign e conversão para `DadoTemporal` ficam isolados em services de integração, mantendo o `ReqApiService` pequeno e focado na orquestração do caso de uso.
 
 #### 3. HATEOAS & Modelo de Maturidade de Richardson (Nível 3)
 Nossa API foi construída seguindo o **Nível 3 da escala de Richardson (HATEOAS - Hypermedia As The Engine Of Application State)**.
@@ -225,7 +229,7 @@ Esses validadores implementam a interface `ConstraintValidator<A, T>`, garantind
 - Documentação Swagger/OpenAPI.
 - CORS configurado globalmente.
 - Seed inicial de tipos de API, tipos de plantação e dados de exemplo.
-- Integração externa com NASA POWER e SATVeg via OpenFeign.
+- Integração externa com NASA POWER e SATVeg via OpenFeign, isolada em services próprios.
 - Persistência de dados temporais retornados pelas APIs externas.
 - Geração automática de alertas agrícolas.
 - Coleção Insomnia atualizada com os endpoints do projeto.
@@ -307,12 +311,22 @@ Esses validadores implementam a interface `ConstraintValidator<A, T>`, garantind
 | `POST` | `/api/req-api` | Executa integração externa e persiste dados temporais |
 | `DELETE` | `/api/req-api/{id}` | Remove requisição |
 
-Exemplo de body:
+Exemplo para NASA POWER:
 
 ```json
 {
   "tipoParam": "PRECTOTCORR",
   "tipoApiNome": "NASAPOWER",
+  "idTalhao": 1
+}
+```
+
+Exemplo para SATveg:
+
+```json
+{
+  "tipoParam": "NDVI",
+  "tipoApiNome": "SATVEG",
   "idTalhao": 1
 }
 ```
@@ -445,10 +459,12 @@ Rodar a suite completa:
 mvn clean test
 ```
 
-Última validação local:
+Validações locais recentes:
 
 ```text
-Tests run: 190, Failures: 0, Errors: 0, Skipped: 0
+
+./mvnw.cmd test
+Tests run: 196, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
