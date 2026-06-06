@@ -719,6 +719,20 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/talhao/1
+        name: Get By Talhao ReqApi
+        meta:
+          id: req_get_reqapi_talhao
+          sortKey: -85
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}
         name: Post ReqApi
         meta:
@@ -731,31 +745,6 @@ collection:
             {
                 "tipoParam": "PRECTOTCORR",
                 "tipoApiNome": "NASAPOWER",
-                "idTalhao": 1
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: http://localhost:8080/api/{{ _.path }}/1
-        name: Update ReqApi
-        meta:
-          id: req_put_reqapi
-          sortKey: -70
-        method: PUT
-        body:
-          mimeType: application/json
-          text: |-
-            {
-                "tipoParam": "PRECTOTCORR",
-                "tipoApiNome": "SATVEG",
                 "idTalhao": 1
             }
         headers:
@@ -791,6 +780,20 @@ collection:
     environment:
       path: dados-temporais
     children:
+      - url: http://localhost:8080/api/{{ _.path }}
+        name: Get All Dados Temporais
+        meta:
+          id: req_get_all_dados_temporais
+          sortKey: -110
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
       - url: http://localhost:8080/api/{{ _.path }}/talhao/1
         name: Get By Talhão Dados Temporais
         meta:
@@ -936,6 +939,34 @@ collection:
         headers:
           - name: Content-Type
             value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1/resolver
+        name: Resolver Alerta Agricola
+        meta:
+          id: req_patch_alerta_resolver
+          sortKey: -55
+        method: PATCH
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/{{ _.path }}/1/reabrir
+        name: Reabrir Alerta Agricola
+        meta:
+          id: req_patch_alerta_reabrir
+          sortKey: -54
+        method: PATCH
         settings:
           renderRequestBody: true
           encodeUrl: true
