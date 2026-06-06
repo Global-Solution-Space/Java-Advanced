@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import fiap.com.br.terranova.talhao.Talhao;
 import fiap.com.br.terranova.talhao.TalhaoRepository;
+import fiap.com.br.terranova.validation.ValidLocalizacaoDisponibilidadeValidator;
 import fiap.com.br.terranova.validation.ValidPropriedadeAreaValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintValidator;
@@ -48,6 +49,9 @@ class PropriedadeControllerTest {
     private TalhaoRepository talhaoRepository;
 
     @Mock
+    private PropriedadeRepository propriedadeRepository;
+
+    @Mock
     private HttpServletRequest request;
 
     @InjectMocks
@@ -63,6 +67,9 @@ class PropriedadeControllerTest {
             public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
                 if (key == ValidPropriedadeAreaValidator.class) {
                     return (T) new ValidPropriedadeAreaValidator(talhaoRepository, request);
+                }
+                if (key == ValidLocalizacaoDisponibilidadeValidator.class) {
+                    return (T) new ValidLocalizacaoDisponibilidadeValidator(propriedadeRepository, talhaoRepository, request);
                 }
                 try {
                     return key.getDeclaredConstructor().newInstance();
@@ -112,6 +119,20 @@ class PropriedadeControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nome").value("Fazenda Sol"))
                 .andExpect(jsonPath("$.tamanhoTotal").value(500.0));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenLocalizacaoAlreadyUsed() throws Exception {
+        PropriedadeRequest request = new PropriedadeRequest("Fazenda Sol", 500.0, 1L, 2L);
+        when(propriedadeRepository.existsByLocalizacaoIdLocalizacao(2L)).thenReturn(true);
+
+        mockMvc.perform(post("/api/propriedades")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros").isArray());
+
+        verify(service, never()).create(any(PropriedadeRequest.class));
     }
 
     @Test

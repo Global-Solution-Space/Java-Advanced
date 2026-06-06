@@ -1,13 +1,10 @@
 package fiap.com.br.terranova.reqapi;
 
 import fiap.com.br.terranova.alerta.AlertaService;
+import fiap.com.br.terranova.dadotemporal.DadoTemporal;
 import fiap.com.br.terranova.dadotemporal.DadoTemporalRepository;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
-import fiap.com.br.terranova.integration.nasa.NasaPowerClient;
-import fiap.com.br.terranova.integration.nasa.NasaPowerDataResponse;
-import fiap.com.br.terranova.integration.satveg.SatVegClient;
-import fiap.com.br.terranova.integration.satveg.SatVegDataRequest;
-import fiap.com.br.terranova.integration.satveg.SatVegDataResponse;
+import fiap.com.br.terranova.integration.DadoTemporalIntegrationService;
 import fiap.com.br.terranova.localizacao.Localizacao;
 import fiap.com.br.terranova.reqapi.dto.ReqApiRequest;
 import fiap.com.br.terranova.reqapi.dto.ReqApiResponse;
@@ -20,16 +17,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 class ReqApiServiceIntegrationTest {
@@ -45,9 +41,7 @@ class ReqApiServiceIntegrationTest {
     @Mock
     private AlertaService alertaService;
     @Mock
-    private NasaPowerClient nasaPowerClient;
-    @Mock
-    private SatVegClient satVegClient;
+    private DadoTemporalIntegrationService dadoTemporalIntegrationService;
 
     @InjectMocks
     private ReqApiService service;
@@ -57,212 +51,59 @@ class ReqApiServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        
+
         Localizacao loc = Localizacao.builder()
                 .locLatitude(new BigDecimal("-23.55"))
                 .locLongitude(new BigDecimal("-46.63"))
                 .build();
-                
+
         mockTalhao = Talhao.builder().idTalhao(1L).localizacao(loc).build();
-        ReflectionTestUtils.setField(service, "satVegToken", "Bearer test-token");
     }
 
     @Test
-    void shouldCreateReqApiAndFetchNasaData() {
-        // Arrange
-        ReqApiRequest request = new ReqApiRequest("PRECTOTCORR", "NASAPOWER", 1L);
-        TipoApi tipoNasa = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
-
-        when(tipoApiRepository.findByTipoApi("NASAPOWER")).thenReturn(Optional.of(tipoNasa));
-        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        // Mocking the NASA OpenFeign Client response
-        NasaPowerDataResponse.Properties properties = new NasaPowerDataResponse.Properties(Map.of("PRECTOTCORR", Map.of("20240101", 12.5)));
-        NasaPowerDataResponse nasaResponse = new NasaPowerDataResponse(null, properties);
-        when(nasaPowerClient.getDailyData(anyMap())).thenReturn(nasaResponse);
-
-        // Act
-        ReqApiResponse response = service.create(request);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals("NASAPOWER", response.tipoApiNome());
-        verify(nasaPowerClient, times(1)).getDailyData(anyMap());
-        verify(dadoTemporalRepository, times(1)).saveAll(anyList());
-        verify(alertaService, times(1)).analisarEGerarAlertas(eq(mockTalhao), eq("NASAPOWER"));
-        verify(satVegClient, never()).getSeries(anyString(), any(SatVegDataRequest.class));
-    }
-
-    @Test
-    void shouldCreateReqApiAndFetchSatVegData() {
-        // Arrange
-        ReqApiRequest request = new ReqApiRequest("NDVI", "SATVEG", 1L);
+    void shouldCreateReqApiAndPersistIntegratedData() {
+        ReqApiRequest request = new ReqApiRequest("NDVI", "satveg", 1L);
         TipoApi tipoSatVeg = TipoApi.builder().idTipo(2L).tipoApi("SATVEG").build();
 
-        when(tipoApiRepository.findByTipoApi("SATVEG")).thenReturn(Optional.of(tipoSatVeg));
+        when(tipoApiRepository.findByTipoApi("satveg")).thenReturn(Optional.of(tipoSatVeg));
         when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArgument(0));
+        when(dadoTemporalIntegrationService.buscarDados(eq(tipoSatVeg), eq(request), eq(mockTalhao), any(ReqApi.class)))
+                .thenReturn(List.of(DadoTemporal.builder().dataLeitura(LocalDate.now()).valor(0.85).build()));
 
-        // Mocking the SATveg OpenFeign Client response
-        SatVegDataResponse satVegResponse = new SatVegDataResponse(List.of(0.85), List.of("2020-01-01"));
-        when(satVegClient.getSeries(any(), any(SatVegDataRequest.class))).thenReturn(satVegResponse);
-
-        // Act
         ReqApiResponse response = service.create(request);
 
-        // Assert
         assertNotNull(response);
         assertEquals("SATVEG", response.tipoApiNome());
-        verify(satVegClient, times(1)).getSeries(any(), any(SatVegDataRequest.class));
+        assertEquals("NDVI", response.tipoParam());
+        verify(dadoTemporalIntegrationService, times(1)).buscarDados(eq(tipoSatVeg), eq(request), eq(mockTalhao), any(ReqApi.class));
         verify(dadoTemporalRepository, times(1)).saveAll(anyList());
         verify(alertaService, times(1)).analisarEGerarAlertas(eq(mockTalhao), eq("SATVEG"));
-        verify(nasaPowerClient, never()).getDailyData(anyMap());
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionWhenNasaReturnsBadRequest() {
-        // Arrange
-        ReqApiRequest request = new ReqApiRequest("PRECTOTCORR", "NASAPOWER", 1L);
-        TipoApi tipoNasa = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
-
-        when(tipoApiRepository.findByTipoApi("NASAPOWER")).thenReturn(Optional.of(tipoNasa));
-        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        // Mocking a Feign 400 Bad Request exception
-        feign.Request feignRequest = feign.Request.create(
-                feign.Request.HttpMethod.GET,
-                "https://power.larc.nasa.gov",
-                Map.of(),
-                feign.Request.Body.empty(),
-                null
-        );
-        feign.FeignException.BadRequest badRequestEx = new feign.FeignException.BadRequest(
-                "Bad Request",
-                feignRequest,
-                "{\"detail\":\"Latitude out of bounds\"}".getBytes(),
-                Map.of()
-        );
-
-        when(nasaPowerClient.getDailyData(anyMap())).thenThrow(badRequestEx);
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            service.create(request);
-        });
-
-        assertTrue(exception.getMessage().contains("Erro na integracao com NASA POWER: Latitude out of bounds"));
-    }
-
-    @Test
-    void shouldThrowIllegalArgumentExceptionWhenSatVegReturnsBadRequest() {
-        // Arrange
-        ReqApiRequest request = new ReqApiRequest("NDVI", "SATVEG", 1L);
-        TipoApi tipoSatVeg = TipoApi.builder().idTipo(2L).tipoApi("SATVEG").build();
-
-        when(tipoApiRepository.findByTipoApi("SATVEG")).thenReturn(Optional.of(tipoSatVeg));
-        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        // Mocking a Feign 400 Bad Request exception
-        feign.Request feignRequest = feign.Request.create(
-                feign.Request.HttpMethod.POST,
-                "https://api.cnptia.embrapa.br",
-                Map.of(),
-                feign.Request.Body.empty(),
-                null
-        );
-        feign.FeignException.BadRequest badRequestEx = new feign.FeignException.BadRequest(
-                "Bad Request",
-                feignRequest,
-                "{\"detail\":\"Coordenadas invalidas\"}".getBytes(),
-                Map.of()
-        );
-
-        when(satVegClient.getSeries(any(), any(SatVegDataRequest.class))).thenThrow(badRequestEx);
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            service.create(request);
-        });
-
-        assertTrue(exception.getMessage().contains("Erro na integracao com SATveg: Coordenadas invalidas"));
-    }
-
-    @Test
-    void shouldThrowIllegalArgumentExceptionWhenNasaThrowsGenericException() {
-        // Arrange
-        ReqApiRequest request = new ReqApiRequest("PRECTOTCORR", "NASAPOWER", 1L);
-        TipoApi tipoNasa = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
-
-        when(tipoApiRepository.findByTipoApi("NASAPOWER")).thenReturn(Optional.of(tipoNasa));
-        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        when(nasaPowerClient.getDailyData(anyMap())).thenThrow(new RuntimeException("Timeout na conexao"));
-
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            service.create(request);
-        });
-
-        assertTrue(exception.getMessage().contains("Erro inesperado na integracao com a NASA POWER: Timeout na conexao"));
-    }
-
-    @Test
-    void shouldRejectNasaPowerWithNdviParam() {
-        ReqApiRequest request = new ReqApiRequest("NDVI", "NASAPOWER", 1L);
-        TipoApi tipoNasa = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
-
-        when(tipoApiRepository.findByTipoApi("NASAPOWER")).thenReturn(Optional.of(tipoNasa));
-        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.create(request));
-
-        assertTrue(exception.getMessage().contains("NASAPOWER suporta apenas o parametro PRECTOTCORR"));
-        verify(nasaPowerClient, never()).getDailyData(anyMap());
-        verify(dadoTemporalRepository, never()).saveAll(anyList());
-    }
-
-    @Test
-    void shouldRejectSatVegWithPrecipitationParam() {
+    void shouldPropagateIntegrationValidationErrors() {
         ReqApiRequest request = new ReqApiRequest("PRECTOTCORR", "SATVEG", 1L);
         TipoApi tipoSatVeg = TipoApi.builder().idTipo(2L).tipoApi("SATVEG").build();
 
         when(tipoApiRepository.findByTipoApi("SATVEG")).thenReturn(Optional.of(tipoSatVeg));
         when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
+        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArgument(0));
+        when(dadoTemporalIntegrationService.buscarDados(eq(tipoSatVeg), eq(request), eq(mockTalhao), any(ReqApi.class)))
+                .thenThrow(new IllegalArgumentException("SATVEG suporta apenas o parametro NDVI."));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.create(request));
 
         assertTrue(exception.getMessage().contains("SATVEG suporta apenas o parametro NDVI"));
-        verify(satVegClient, never()).getSeries(anyString(), any(SatVegDataRequest.class));
         verify(dadoTemporalRepository, never()).saveAll(anyList());
-    }
-
-    @Test
-    void shouldThrowIllegalArgumentExceptionWhenSatVegTokenIsMissing() {
-        ReqApiRequest request = new ReqApiRequest("NDVI", "SATVEG", 1L);
-        TipoApi tipoSatVeg = TipoApi.builder().idTipo(2L).tipoApi("SATVEG").build();
-        ReflectionTestUtils.setField(service, "satVegToken", "");
-
-        when(tipoApiRepository.findByTipoApi("SATVEG")).thenReturn(Optional.of(tipoSatVeg));
-        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
-        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.create(request));
-
-        assertTrue(exception.getMessage().contains("Token da API SATVeg nao configurado"));
-        verify(satVegClient, never()).getSeries(anyString(), any(SatVegDataRequest.class));
+        verify(alertaService, never()).analisarEGerarAlertas(any(), any());
     }
 
     @Test
     void shouldFindAllReqApis() {
         TipoApi tipo = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
         ReqApi reqApi = ReqApi.builder().idApi(10L).tipoParam("PRECTOTCORR").tipoApi(tipo).build();
-        
+
         org.springframework.data.domain.Page<ReqApi> page = new org.springframework.data.domain.PageImpl<>(List.of(reqApi));
         when(reqApiRepository.findAll(any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
 

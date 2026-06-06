@@ -7,6 +7,7 @@ import fiap.com.br.terranova.propriedade.Propriedade;
 import fiap.com.br.terranova.propriedade.PropriedadeRepository;
 import fiap.com.br.terranova.talhao.dto.TalhaoRequest;
 import fiap.com.br.terranova.talhao.dto.TalhaoResponse;
+import fiap.com.br.terranova.validation.ValidLocalizacaoDisponibilidadeValidator;
 import fiap.com.br.terranova.validation.ValidTalhaoAreaValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintValidator;
@@ -69,6 +70,9 @@ class TalhaoControllerTest {
             public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
                 if (key == ValidTalhaoAreaValidator.class) {
                     return (T) new ValidTalhaoAreaValidator(talhaoRepository, propriedadeRepository, request);
+                }
+                if (key == ValidLocalizacaoDisponibilidadeValidator.class) {
+                    return (T) new ValidLocalizacaoDisponibilidadeValidator(propriedadeRepository, talhaoRepository, request);
                 }
                 try {
                     return key.getDeclaredConstructor().newInstance();
@@ -142,6 +146,24 @@ class TalhaoControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nomeTalhao").value("Talhao Novo"))
                 .andExpect(jsonPath("$.volumArea").value(45.0));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenLocalizacaoAlreadyUsed() throws Exception {
+        Propriedade propriedade = Propriedade.builder().idPropriedade(1L).tamanhoTotal(100.0).build();
+        when(propriedadeRepository.findById(1L)).thenReturn(Optional.of(propriedade));
+        when(talhaoRepository.findByPropriedadeIdPropriedade(1L)).thenReturn(List.of());
+        when(talhaoRepository.existsByLocalizacaoIdLocalizacao(1L)).thenReturn(true);
+
+        TalhaoRequest requestDto = new TalhaoRequest("Talhao Novo", 45.0, 1L, 1L, 1L);
+
+        mockMvc.perform(post("/api/talhoes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros").isArray());
+
+        verify(service, never()).create(any(TalhaoRequest.class));
     }
 
     @Test

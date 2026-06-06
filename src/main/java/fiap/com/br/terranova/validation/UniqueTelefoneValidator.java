@@ -1,5 +1,6 @@
 package fiap.com.br.terranova.validation;
 
+import fiap.com.br.terranova.telefone.Telefone;
 import fiap.com.br.terranova.telefone.TelefoneRepository;
 import fiap.com.br.terranova.telefone.dto.TelefoneRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,8 +34,11 @@ public class UniqueTelefoneValidator implements ConstraintValidator<UniqueTelefo
             Map<?, ?> pathVariables = (Map<?, ?>) attr;
             if (pathVariables.containsKey("id")) {
                 try {
-                    // Se for atualização, ignora o próprio telefone
-                    return true;
+                    Long id = Long.parseLong(String.valueOf(pathVariables.get("id")));
+                    Telefone existing = telefoneRepository.findById(id).orElse(null);
+                    if (existing != null && existing.getDdd().equals(telefoneRequest.ddd()) && existing.getNumero().equals(telefoneRequest.numero())) {
+                        return true; // O telefone pertence ao próprio registro sendo atualizado
+                    }
                 } catch (NumberFormatException ignored) {}
             }
         }

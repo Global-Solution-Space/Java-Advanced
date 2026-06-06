@@ -5,6 +5,10 @@ import fiap.com.br.terranova.exception.GlobalExceptionHandler;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.telefone.dto.TelefoneRequest;
 import fiap.com.br.terranova.telefone.dto.TelefoneResponse;
+import fiap.com.br.terranova.validation.UniqueTelefoneValidator;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,6 +22,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.List;
 
@@ -37,15 +42,46 @@ class TelefoneControllerTest {
     @Mock
     private TelefoneService service;
 
+    @Mock
+    private TelefoneRepository telefoneRepository;
+
+    @Mock
+    private HttpServletRequest request;
+
     @InjectMocks
     private TelefoneController controller;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        ConstraintValidatorFactory validatorFactory = new ConstraintValidatorFactory() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
+                if (key == UniqueTelefoneValidator.class) {
+                    return (T) new UniqueTelefoneValidator(telefoneRepository, request);
+                }
+                try {
+                    return key.getDeclaredConstructor().newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void releaseInstance(ConstraintValidator<?, ?> instance) {
+            }
+        };
+
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.setConstraintValidatorFactory(validatorFactory);
+        validator.afterPropertiesSet();
+
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .setValidator(validator)
                 .build();
     }
 

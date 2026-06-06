@@ -464,7 +464,7 @@ Validações locais recentes:
 ```text
 
 ./mvnw.cmd test
-Tests run: 196, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 233, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 

@@ -159,19 +159,6 @@ class TalhaoServiceTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionWhenLocalizacaoAlreadyUsedByAnotherTalhao() {
-        TalhaoRequest request = new TalhaoRequest("Talhao A", 25.0, 1L, 2L, 3L);
-
-        when(tipoPlantacaoRepository.findById(1L)).thenReturn(Optional.of(mockTipoPlantacao));
-        when(propriedadeRepository.findById(2L)).thenReturn(Optional.of(mockPropriedade));
-        when(localizacaoRepository.findById(3L)).thenReturn(Optional.of(mockLocalizacao));
-        when(talhaoRepository.existsByLocalizacaoIdLocalizacao(3L)).thenReturn(true);
-
-        assertThrows(IllegalArgumentException.class, () -> service.create(request));
-        verify(talhaoRepository, never()).save(any(Talhao.class));
-    }
-
-    @Test
     void shouldUpdateTalhaoSuccessfully() {
         TalhaoRequest request = new TalhaoRequest("Talhao Atualizado", 30.0, 1L, 2L, 3L);
         Talhao updatedTalhao = Talhao.builder()

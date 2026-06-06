@@ -9,6 +9,9 @@ import fiap.com.br.terranova.propriedade.PropriedadeRepository;
 import fiap.com.br.terranova.talhao.Talhao;
 import fiap.com.br.terranova.talhao.TalhaoRepository;
 import fiap.com.br.terranova.talhao.dto.TalhaoRequest;
+import fiap.com.br.terranova.telefone.Telefone;
+import fiap.com.br.terranova.telefone.TelefoneRepository;
+import fiap.com.br.terranova.telefone.dto.TelefoneRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +40,9 @@ class ValidationValidatorsTest {
 
     @Mock
     private PropriedadeRepository propriedadeRepository;
+
+    @Mock
+    private TelefoneRepository telefoneRepository;
 
     @Mock
     private HttpServletRequest request;
@@ -133,6 +139,59 @@ class ValidationValidatorsTest {
         when(produtorRepository.findById(5L)).thenReturn(Optional.of(existing));
 
         assertTrue(validator.isValid("mesmo@fiap.com", context));
+    }
+
+    // --- UniqueTelefoneValidator Tests ---
+    @Test
+    void shouldPassUniqueTelefoneWhenRequestOrValuesNull() {
+        UniqueTelefoneValidator validator = new UniqueTelefoneValidator(telefoneRepository, request);
+        assertTrue(validator.isValid(null, context));
+        assertTrue(validator.isValid(new TelefoneRequest(null, "999999999", 1L), context));
+        assertTrue(validator.isValid(new TelefoneRequest("11", null, 1L), context));
+    }
+
+    @Test
+    void shouldPassUniqueTelefoneWhenDddAndNumeroDoNotExistInDb() {
+        UniqueTelefoneValidator validator = new UniqueTelefoneValidator(telefoneRepository, request);
+        TelefoneRequest dto = new TelefoneRequest("11", "999999999", 1L);
+        when(telefoneRepository.existsByDddAndNumero("11", "999999999")).thenReturn(false);
+
+        assertTrue(validator.isValid(dto, context));
+    }
+
+    @Test
+    void shouldFailUniqueTelefoneWhenDddAndNumeroAlreadyExist() {
+        UniqueTelefoneValidator validator = new UniqueTelefoneValidator(telefoneRepository, request);
+        TelefoneRequest dto = new TelefoneRequest("11", "999999999", 1L);
+        when(telefoneRepository.existsByDddAndNumero("11", "999999999")).thenReturn(true);
+
+        assertFalse(validator.isValid(dto, context));
+    }
+
+    @Test
+    void shouldPassUniqueTelefoneWhenTelefoneBelongsToSameTelefoneBeingUpdated() {
+        UniqueTelefoneValidator validator = new UniqueTelefoneValidator(telefoneRepository, request);
+        TelefoneRequest dto = new TelefoneRequest("11", "999999999", 1L);
+
+        Map<String, String> pathVariables = new HashMap<>();
+        pathVariables.put("id", "10");
+        when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(pathVariables);
+
+        Telefone existing = Telefone.builder().idTelefone(10L).ddd("11").numero("999999999").build();
+        when(telefoneRepository.findById(10L)).thenReturn(Optional.of(existing));
+
+        assertTrue(validator.isValid(dto, context));
+    }
+
+    @Test
+    void shouldPassUniqueTelefoneWhenPathVariablesAttributeIsInvalidType() {
+        UniqueTelefoneValidator validator = new UniqueTelefoneValidator(telefoneRepository, request);
+        TelefoneRequest dto = new TelefoneRequest("11", "999999999", 1L);
+
+        when(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn("InvalidType");
+        when(telefoneRepository.existsByDddAndNumero("11", "999999999")).thenReturn(false);
+
+        assertTrue(validator.isValid(dto, context));
     }
 
     // --- ValidTalhaoAreaValidator Tests ---
