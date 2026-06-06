@@ -12,6 +12,9 @@ import fiap.com.br.terranova.talhao.TalhaoRepository;
 import fiap.com.br.terranova.talhao.TalhaoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -57,8 +60,7 @@ class PropriedadeServiceTest {
         mockProdutor = Produtor.builder().idProdutor(1L).nome("Enzo").email("enzo@fiap.com").build();
         mockLocalizacao = Localizacao.builder()
                 .idLocalizacao(2L)
-                .locLatitude(BigDecimal.valueOf(-23.5505))
-                .locLongitude(BigDecimal.valueOf(-46.6333))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(BigDecimal.valueOf(-46.6333).doubleValue(), BigDecimal.valueOf(-23.5505).doubleValue())))
                 .build();
         mockPropriedade = Propriedade.builder()
                 .idPropriedade(10L)

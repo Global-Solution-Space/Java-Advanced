@@ -5,6 +5,9 @@ import fiap.com.br.terranova.localizacao.Localizacao;
 import fiap.com.br.terranova.reqapi.ReqApi;
 import fiap.com.br.terranova.talhao.Talhao;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
@@ -57,8 +60,8 @@ class NasaPowerIntegrationServiceTest {
         Map<String, Object> query = queryCaptor.getValue();
         assertEquals("20200101", query.get("start"));
         assertEquals("prectotcorr", query.get("parameters"));
-        assertEquals(talhao.getLocalizacao().getLocLatitude(), query.get("latitude"));
-        assertEquals(talhao.getLocalizacao().getLocLongitude(), query.get("longitude"));
+        assertEquals(BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getY()), query.get("latitude"));
+        assertEquals(BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getX()), query.get("longitude"));
     }
 
     @Test
@@ -76,8 +79,7 @@ class NasaPowerIntegrationServiceTest {
 
     private Talhao createTalhao() {
         Localizacao localizacao = Localizacao.builder()
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         return Talhao.builder()
                 .idTalhao(1L)

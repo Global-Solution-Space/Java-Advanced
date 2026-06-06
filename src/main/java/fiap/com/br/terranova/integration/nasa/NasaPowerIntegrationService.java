@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -65,8 +66,8 @@ public class NasaPowerIntegrationService {
         return Map.ofEntries(
                 Map.entry("start", LocalDate.of(2020, 1, 1).format(NASA_FORMATTER)),
                 Map.entry("end", dataFim.format(NASA_FORMATTER)),
-                Map.entry("latitude", talhao.getLocalizacao().getLocLatitude()),
-                Map.entry("longitude", talhao.getLocalizacao().getLocLongitude()),
+                Map.entry("latitude", BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getY())),
+                Map.entry("longitude", BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getX())),
                 Map.entry("community", "ag"),
                 Map.entry("parameters", PARAMETRO_PRECIPITACAO),
                 Map.entry("format", "JSON"),

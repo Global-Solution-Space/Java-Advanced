@@ -8,6 +8,12 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
+
+import org.locationtech.jts.geom.Point;
+
 @BrasilCoordenadas
 public record LocalizacaoRequest(
         @NotNull
@@ -21,9 +27,11 @@ public record LocalizacaoRequest(
         BigDecimal locLongitude
 ) {
     public Localizacao toEntity() {
+        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+        Point point = factory.createPoint(new Coordinate(locLongitude.doubleValue(), locLatitude.doubleValue()));
+
         return Localizacao.builder()
-                .locLatitude(locLatitude)
-                .locLongitude(locLongitude)
+                .coordenadas(point)
                 .build();
     }
 }

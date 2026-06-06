@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,8 +73,8 @@ public class SatVegIntegrationService {
                 .preFiltro(3)
                 .filtro("sav")
                 .parametroFiltro(4)
-                .latitude(talhao.getLocalizacao().getLocLatitude())
-                .longitude(talhao.getLocalizacao().getLocLongitude())
+                .latitude(BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getY()))
+                .longitude(BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getX()))
                 .build();
     }
 }

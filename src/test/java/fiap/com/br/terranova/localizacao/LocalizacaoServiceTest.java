@@ -7,6 +7,9 @@ import fiap.com.br.terranova.propriedade.PropriedadeRepository;
 import fiap.com.br.terranova.talhao.TalhaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,8 +50,7 @@ class LocalizacaoServiceTest {
     void shouldFindAllLocalizacoes() {
         Localizacao localizacao = Localizacao.builder()
                 .idLocalizacao(1L)
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         Page<Localizacao> page = new PageImpl<>(List.of(localizacao));
         when(repository.findAll(any(Pageable.class))).thenReturn(page);
@@ -64,8 +66,7 @@ class LocalizacaoServiceTest {
     void shouldFindLocalizacaoById() {
         Localizacao localizacao = Localizacao.builder()
                 .idLocalizacao(1L)
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         when(repository.findById(1L)).thenReturn(Optional.of(localizacao));
 
@@ -92,8 +93,7 @@ class LocalizacaoServiceTest {
         
         Localizacao savedEntity = Localizacao.builder()
                 .idLocalizacao(99L)
-                .locLatitude(lat)
-                .locLongitude(lon)
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate((lon).doubleValue(), (lat).doubleValue())))
                 .build();
 
         // Configura o repositório para retornar a entidade existente
@@ -120,8 +120,7 @@ class LocalizacaoServiceTest {
         
         Localizacao newEntity = Localizacao.builder()
                 .idLocalizacao(100L)
-                .locLatitude(lat)
-                .locLongitude(lon)
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate((lon).doubleValue(), (lat).doubleValue())))
                 .build();
 
         // Configura o repositório para NÃO encontrar a entidade
@@ -142,8 +141,7 @@ class LocalizacaoServiceTest {
     void shouldUpdateLocalizacao() {
         Localizacao existing = Localizacao.builder()
                 .idLocalizacao(1L)
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         LocalizacaoRequest request = new LocalizacaoRequest(new BigDecimal("-15.7801"), new BigDecimal("-47.9292"));
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
@@ -157,15 +155,14 @@ class LocalizacaoServiceTest {
         ArgumentCaptor<Localizacao> captor = ArgumentCaptor.forClass(Localizacao.class);
         verify(repository).save(captor.capture());
         assertEquals(1L, captor.getValue().getIdLocalizacao());
-        assertEquals(new BigDecimal("-47.9292"), captor.getValue().getLocLongitude());
+        assertEquals(-47.9292, captor.getValue().getCoordenadas().getX(), 0.0001);
     }
 
     @Test
     void shouldDeleteLocalizacao() {
         Localizacao existing = Localizacao.builder()
                 .idLocalizacao(1L)
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
         when(propriedadeRepository.existsByLocalizacaoIdLocalizacao(1L)).thenReturn(false);
@@ -180,8 +177,7 @@ class LocalizacaoServiceTest {
     void shouldRejectDeleteWhenLocalizacaoIsInUse() {
         Localizacao existing = Localizacao.builder()
                 .idLocalizacao(1L)
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
         when(propriedadeRepository.existsByLocalizacaoIdLocalizacao(1L)).thenReturn(true);
@@ -191,3 +187,5 @@ class LocalizacaoServiceTest {
         verify(repository, never()).delete(any(Localizacao.class));
     }
 }
+
+

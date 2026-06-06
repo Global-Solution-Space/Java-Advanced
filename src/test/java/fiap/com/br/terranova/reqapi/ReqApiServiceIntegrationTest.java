@@ -14,6 +14,9 @@ import fiap.com.br.terranova.talhao.Talhao;
 import fiap.com.br.terranova.talhao.TalhaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -53,8 +56,7 @@ class ReqApiServiceIntegrationTest {
         MockitoAnnotations.openMocks(this);
 
         Localizacao loc = Localizacao.builder()
-                .locLatitude(new BigDecimal("-23.55"))
-                .locLongitude(new BigDecimal("-46.63"))
+                .coordenadas(new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(new BigDecimal("-46.63").doubleValue(), new BigDecimal("-23.55").doubleValue())))
                 .build();
 
         mockTalhao = Talhao.builder().idTalhao(1L).localizacao(loc).build();

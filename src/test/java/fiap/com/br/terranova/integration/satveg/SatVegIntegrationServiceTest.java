@@ -55,8 +55,8 @@ class SatVegIntegrationServiceTest {
         assertEquals(3, request.getPreFiltro());
         assertEquals("sav", request.getFiltro());
         assertEquals(4, request.getParametroFiltro());
-        assertEquals(talhao.getLocalizacao().getLocLatitude(), request.getLatitude());
-        assertEquals(talhao.getLocalizacao().getLocLongitude(), request.getLongitude());
+        assertEquals(BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getY()), request.getLatitude());
+        assertEquals(BigDecimal.valueOf(talhao.getLocalizacao().getCoordenadas().getX()), request.getLongitude());
     }
 
     @Test
@@ -72,8 +72,7 @@ class SatVegIntegrationServiceTest {
 
     private Talhao createTalhao() {
         Localizacao localizacao = Localizacao.builder()
-                .locLatitude(new BigDecimal("-23.5505"))
-                .locLongitude(new BigDecimal("-46.6333"))
+                .coordenadas(new org.locationtech.jts.geom.GeometryFactory(new org.locationtech.jts.geom.PrecisionModel(), 4326).createPoint(new org.locationtech.jts.geom.Coordinate(new BigDecimal("-46.6333").doubleValue(), new BigDecimal("-23.5505").doubleValue())))
                 .build();
         return Talhao.builder()
                 .idTalhao(1L)

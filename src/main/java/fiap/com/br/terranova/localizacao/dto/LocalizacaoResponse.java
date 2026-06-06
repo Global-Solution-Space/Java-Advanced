@@ -16,8 +16,8 @@ public record LocalizacaoResponse(
     public static LocalizacaoResponse fromEntity(Localizacao entity) {
         return new LocalizacaoResponse(
                 entity.getIdLocalizacao(),
-                entity.getLocLatitude(),
-                entity.getLocLongitude()
+                BigDecimal.valueOf(entity.getCoordenadas().getY()),
+                BigDecimal.valueOf(entity.getCoordenadas().getX())
         );
     }
 

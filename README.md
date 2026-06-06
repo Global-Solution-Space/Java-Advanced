@@ -73,6 +73,7 @@ O **Terra Nova** apoia produtores rurais no acompanhamento de talhões e proprie
 | SpringDoc OpenAPI | Swagger/OpenAPI |
 | Maven | Build e gerenciamento de dependências |
 | JUnit 5 / Mockito / MockMvc | Testes automatizados |
+| Hibernate Spatial | Mapeamento geométrico (SDO_GEOMETRY) |
 
 ---
 ## 📂 Estrutura Detalhada de Pastas e Validadores (Java)
@@ -207,6 +208,9 @@ Além das anotações tradicionais do Jakarta Validation (`@NotNull`, `@NotBlank
 - Validação de Coordenadas Geográficas (Latitude/Longitude válidas).
 - Regra de correspondência de área de cultivo (a soma das áreas dos Talhões não pode exceder a área total da Propriedade).
 Esses validadores implementam a interface `ConstraintValidator<A, T>`, garantindo que regras complexas sejam validadas em nível de DTO antes mesmo de bater na controller.
+
+#### 5. Hibernate Spatial & Mapeamento SDO_GEOMETRY
+A entidade `Localizacao` foi construída utilizando o tipo `org.locationtech.jts.geom.Point`, provido pela biblioteca JTS (Java Topology Suite). Essa abstração permite que o Hibernate Spatial seja completamente "agnóstico" em relação ao banco de dados subjacente: quando em desenvolvimento local, a aplicação interage com o tipo nativo `GEOMETRY` do H2; no ambiente de homologação/produção rodando Oracle Database, o Hibernate traduz o tipo Java automaticamente para a estrutura nativa `MDSYS.SDO_GEOMETRY`. Isso possibilita o uso de indexação espacial, além de suportar operações como cálculo de distância e intersecção entre talhões, aderindo aos requisitos de banco de dados avançado.
 
 ---
 
