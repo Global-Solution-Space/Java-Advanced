@@ -3,6 +3,7 @@ package fiap.com.br.terranova.propriedade.dto;
 import fiap.com.br.terranova.localizacao.Localizacao;
 import fiap.com.br.terranova.produtor.Produtor;
 import fiap.com.br.terranova.propriedade.Propriedade;
+import fiap.com.br.terranova.validation.ValidLocalizacaoDisponivel;
 import fiap.com.br.terranova.validation.ValidPropriedadeArea;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +26,7 @@ public record PropriedadeRequest(
         Long idProdutor,
 
         @NotNull
+        @ValidLocalizacaoDisponivel
         Long idLocalizacao
 ) {
     public Propriedade toEntity(Produtor produtor, Localizacao localizacao) {

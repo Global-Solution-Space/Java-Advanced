@@ -111,7 +111,7 @@ class ProdutorControllerTest {
     @Test
     void shouldCreateProdutorSuccessfullyWhenDataIsValid() throws Exception {
         ProdutorRequest request = new ProdutorRequest("Enzo", "enzo@fiap.com", "senha123", null);
-        ProdutorResponse response = new ProdutorResponse(1L, "Enzo", "enzo@fiap.com", null);
+        ProdutorResponse response = new ProdutorResponse(1L, "Enzo", "enzo@fiap.com", "senha123");
 
         // E-mail não está em uso
         when(produtorRepository.existsByEmail("enzo@fiap.com")).thenReturn(false);
@@ -127,7 +127,7 @@ class ProdutorControllerTest {
 
     @Test
     void shouldReturnProdutorWhenFoundById() throws Exception {
-        ProdutorResponse response = new ProdutorResponse(1L, "Enzo", "enzo@fiap.com", null);
+        ProdutorResponse response = new ProdutorResponse(1L, "Enzo", "enzo@fiap.com", "senha123");
         when(service.findById(1L)).thenReturn(response);
 
         mockMvc.perform(get("/api/produtores/1"))
@@ -149,7 +149,7 @@ class ProdutorControllerTest {
     @Test
     void shouldUpdateProdutorSuccessfully() throws Exception {
         ProdutorRequest requestData = new ProdutorRequest("Enzo Alterado", "enzo.novo@fiap.com", "novasenha123", null);
-        ProdutorResponse response = new ProdutorResponse(1L, "Enzo Alterado", "enzo.novo@fiap.com", null);
+        ProdutorResponse response = new ProdutorResponse(1L, "Enzo Alterado", "enzo.novo@fiap.com", "novasenha123");
 
         // Simula path variables do HttpServletRequest para que o validador passe se for o mesmo id
         Map<String, String> pathVariables = new HashMap<>();

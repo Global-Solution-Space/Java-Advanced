@@ -1,6 +1,7 @@
 package fiap.com.br.terranova.tipoplantacao;
 
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
+import fiap.com.br.terranova.talhao.TalhaoRepository;
 import fiap.com.br.terranova.tipoplantacao.dto.TipoPlantacaoRequest;
 import fiap.com.br.terranova.tipoplantacao.dto.TipoPlantacaoResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,9 @@ class TipoPlantacaoServiceTest {
 
     @Mock
     private TipoPlantacaoRepository repository;
+
+    @Mock
+    private TalhaoRepository talhaoRepository;
 
     @InjectMocks
     private TipoPlantacaoService service;
@@ -111,10 +115,21 @@ class TipoPlantacaoServiceTest {
     @Test
     void shouldDeleteTipoPlantacaoSuccessfully() {
         when(repository.findById(1L)).thenReturn(Optional.of(mockTipoPlantacao));
+        when(talhaoRepository.existsByTipoPlantacaoIdTipoPlant(1L)).thenReturn(false);
 
         service.delete(1L);
 
         verify(repository, times(1)).delete(mockTipoPlantacao);
+    }
+
+    @Test
+    void shouldRejectDeleteWhenTipoPlantacaoIsInUse() {
+        when(repository.findById(1L)).thenReturn(Optional.of(mockTipoPlantacao));
+        when(talhaoRepository.existsByTipoPlantacaoIdTipoPlant(1L)).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> service.delete(1L));
+
+        verify(repository, never()).delete(any(TipoPlantacao.class));
     }
 
     @Test

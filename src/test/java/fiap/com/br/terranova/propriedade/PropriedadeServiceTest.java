@@ -142,6 +142,18 @@ class PropriedadeServiceTest {
     }
 
     @Test
+    void shouldThrowIllegalArgumentExceptionWhenLocalizacaoAlreadyUsedByAnotherPropriedade() {
+        PropriedadeRequest request = new PropriedadeRequest("Fazenda Sol", 500.0, 1L, 2L);
+
+        when(produtorRepository.findById(1L)).thenReturn(Optional.of(mockProdutor));
+        when(localizacaoRepository.findById(2L)).thenReturn(Optional.of(mockLocalizacao));
+        when(propriedadeRepository.existsByLocalizacaoIdLocalizacao(2L)).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> service.create(request));
+        verify(propriedadeRepository, never()).save(any(Propriedade.class));
+    }
+
+    @Test
     void shouldUpdatePropriedadeSuccessfully() {
         PropriedadeRequest request = new PropriedadeRequest("Fazenda Alterada", 600.0, 1L, 2L);
         Propriedade updatedPropriedade = Propriedade.builder()

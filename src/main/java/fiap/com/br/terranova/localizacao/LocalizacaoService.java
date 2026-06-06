@@ -3,6 +3,8 @@ package fiap.com.br.terranova.localizacao;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.localizacao.dto.LocalizacaoRequest;
 import fiap.com.br.terranova.localizacao.dto.LocalizacaoResponse;
+import fiap.com.br.terranova.propriedade.PropriedadeRepository;
+import fiap.com.br.terranova.talhao.TalhaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class LocalizacaoService {
 
     private final LocalizacaoRepository repository;
+    private final PropriedadeRepository propriedadeRepository;
+    private final TalhaoRepository talhaoRepository;
 
     public Page<LocalizacaoResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(LocalizacaoResponse::fromEntity);
@@ -42,6 +46,7 @@ public class LocalizacaoService {
     @Transactional
     public void delete(Long id) {
         Localizacao entity = findLocalizacaoById(id);
+        if (propriedadeRepository.existsByLocalizacaoIdLocalizacao(id) || talhaoRepository.existsByLocalizacaoIdLocalizacao(id)) throw new IllegalArgumentException("Localização em uso por propriedade ou talhão. Remova ou atualize os vínculos antes de excluir.");
         repository.delete(entity);
     }
 

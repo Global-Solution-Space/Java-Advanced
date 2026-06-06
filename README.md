@@ -317,6 +317,13 @@ Exemplo de body:
 }
 ```
 
+Compatibilidade de parâmetros:
+
+| API | `tipoParam` aceito |
+| --- | --- |
+| `NASAPOWER` | `PRECTOTCORR` |
+| `SATVEG` | `NDVI` |
+
 ### Dados Temporais
 
 Os endpoints de dados temporais retornam coleções completas, sem `Pageable`, porque o Mobile consome a série inteira para visualização e análise local. Como cada integração pode gerar centenas de pontos, uma versão paginada pode ser adicionada futuramente em rota separada sem quebrar o contrato atual.

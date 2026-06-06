@@ -3,6 +3,8 @@ package fiap.com.br.terranova.localizacao;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.localizacao.dto.LocalizacaoRequest;
 import fiap.com.br.terranova.localizacao.dto.LocalizacaoResponse;
+import fiap.com.br.terranova.propriedade.PropriedadeRepository;
+import fiap.com.br.terranova.talhao.TalhaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +28,12 @@ class LocalizacaoServiceTest {
 
     @Mock
     private LocalizacaoRepository repository;
+
+    @Mock
+    private PropriedadeRepository propriedadeRepository;
+
+    @Mock
+    private TalhaoRepository talhaoRepository;
 
     @InjectMocks
     private LocalizacaoService service;
@@ -76,31 +84,31 @@ class LocalizacaoServiceTest {
     }
 
     @Test
-    void shouldReturnExistingLocalizacaoWhenCoordinatesAreDuplicate() {
+    void shouldCreateNewLocalizacaoEvenWhenCoordinatesAreDuplicate() {
         // Arrange
         BigDecimal lat = new BigDecimal("-23.5505");
         BigDecimal lon = new BigDecimal("-46.6333");
         LocalizacaoRequest request = new LocalizacaoRequest(lat, lon);
         
-        Localizacao existingEntity = Localizacao.builder()
+        Localizacao savedEntity = Localizacao.builder()
                 .idLocalizacao(99L)
                 .locLatitude(lat)
                 .locLongitude(lon)
                 .build();
 
         // Configura o repositório para retornar a entidade existente
-        when(repository.findByLocLatitudeAndLocLongitude(lat, lon)).thenReturn(Optional.of(existingEntity));
+        when(repository.save(any(Localizacao.class))).thenReturn(savedEntity);
 
         // Act
         LocalizacaoResponse response = service.create(request);
 
         // Assert
-        assertEquals(99L, response.id(), "Deveria ter retornado o ID da localização que já existia.");
+        assertEquals(99L, response.id(), "Deveria criar uma nova localização mesmo com coordenadas repetidas.");
         assertEquals(lat, response.locLatitude());
         assertEquals(lon, response.locLongitude());
         
         // Verifica que o repository.save NUNCA foi chamado, prevenindo duplicatas!
-        verify(repository, never()).save(any(Localizacao.class));
+        verify(repository, times(1)).save(any(Localizacao.class));
     }
 
     @Test
@@ -117,7 +125,6 @@ class LocalizacaoServiceTest {
                 .build();
 
         // Configura o repositório para NÃO encontrar a entidade
-        when(repository.findByLocLatitudeAndLocLongitude(lat, lon)).thenReturn(Optional.empty());
         // Configura o save para retornar a entidade salva
         when(repository.save(any(Localizacao.class))).thenReturn(newEntity);
 
@@ -161,9 +168,26 @@ class LocalizacaoServiceTest {
                 .locLongitude(new BigDecimal("-46.6333"))
                 .build();
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(propriedadeRepository.existsByLocalizacaoIdLocalizacao(1L)).thenReturn(false);
+        when(talhaoRepository.existsByLocalizacaoIdLocalizacao(1L)).thenReturn(false);
 
         service.delete(1L);
 
         verify(repository, times(1)).delete(existing);
+    }
+
+    @Test
+    void shouldRejectDeleteWhenLocalizacaoIsInUse() {
+        Localizacao existing = Localizacao.builder()
+                .idLocalizacao(1L)
+                .locLatitude(new BigDecimal("-23.5505"))
+                .locLongitude(new BigDecimal("-46.6333"))
+                .build();
+        when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(propriedadeRepository.existsByLocalizacaoIdLocalizacao(1L)).thenReturn(true);
+
+        assertThrows(IllegalArgumentException.class, () -> service.delete(1L));
+
+        verify(repository, never()).delete(any(Localizacao.class));
     }
 }

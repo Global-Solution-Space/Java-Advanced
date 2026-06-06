@@ -4,6 +4,7 @@ import fiap.com.br.terranova.localizacao.Localizacao;
 import fiap.com.br.terranova.propriedade.Propriedade;
 import fiap.com.br.terranova.talhao.Talhao;
 import fiap.com.br.terranova.tipoplantacao.TipoPlantacao;
+import fiap.com.br.terranova.validation.ValidLocalizacaoDisponivel;
 import fiap.com.br.terranova.validation.ValidTalhaoArea;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotBlank;
@@ -29,6 +30,7 @@ public record TalhaoRequest(
         Long idPropriedade,
 
         @NotNull
+        @ValidLocalizacaoDisponivel
         Long idLocalizacao
 ) {
     public Talhao toEntity(TipoPlantacao tipoPlantacao, Propriedade propriedade, Localizacao localizacao) {

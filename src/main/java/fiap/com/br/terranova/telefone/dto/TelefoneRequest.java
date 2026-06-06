@@ -2,9 +2,11 @@ package fiap.com.br.terranova.telefone.dto;
 
 import fiap.com.br.terranova.produtor.Produtor;
 import fiap.com.br.terranova.telefone.Telefone;
+import fiap.com.br.terranova.validation.UniqueTelefone;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+@UniqueTelefone
 public record TelefoneRequest(
         @NotBlank
         @Pattern(regexp = "\\d{2}", message = "O DDD deve conter exatamente 2 digitos numericos")

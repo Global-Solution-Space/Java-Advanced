@@ -3,6 +3,9 @@ package fiap.com.br.terranova.produtor;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.produtor.dto.ProdutorRequest;
 import fiap.com.br.terranova.produtor.dto.ProdutorResponse;
+import fiap.com.br.terranova.propriedade.Propriedade;
+import fiap.com.br.terranova.propriedade.PropriedadeRepository;
+import fiap.com.br.terranova.propriedade.PropriedadeService;
 import fiap.com.br.terranova.telefone.Telefone;
 import fiap.com.br.terranova.telefone.TelefoneRepository;
 import fiap.com.br.terranova.telefone.dto.TelefoneRequest;
@@ -29,6 +32,12 @@ class ProdutorServiceTest {
 
     @Mock
     private TelefoneRepository telefoneRepository;
+
+    @Mock
+    private PropriedadeRepository propriedadeRepository;
+
+    @Mock
+    private PropriedadeService propriedadeService;
 
     @InjectMocks
     private ProdutorService service;
@@ -146,11 +155,30 @@ class ProdutorServiceTest {
         // Arrange
         Produtor existingProdutor = Produtor.builder().idProdutor(1L).nome("Enzo").build();
         when(produtorRepository.findById(1L)).thenReturn(Optional.of(existingProdutor));
+        when(propriedadeRepository.findByProdutorIdProdutor(1L)).thenReturn(List.of());
+        when(telefoneRepository.findAllByProdutorIdProdutor(1L)).thenReturn(List.of());
 
         // Act
         service.delete(1L);
 
         // Assert
+        verify(telefoneRepository, times(1)).deleteAll(List.of());
+        verify(produtorRepository, times(1)).delete(existingProdutor);
+    }
+
+    @Test
+    void shouldDeleteProdutorDependentsBeforeDeletingProdutor() {
+        Produtor existingProdutor = Produtor.builder().idProdutor(1L).nome("Enzo").build();
+        Propriedade propriedade = Propriedade.builder().idPropriedade(10L).build();
+        Telefone telefone = Telefone.builder().idTelefone(20L).build();
+        when(produtorRepository.findById(1L)).thenReturn(Optional.of(existingProdutor));
+        when(propriedadeRepository.findByProdutorIdProdutor(1L)).thenReturn(List.of(propriedade));
+        when(telefoneRepository.findAllByProdutorIdProdutor(1L)).thenReturn(List.of(telefone));
+
+        service.delete(1L);
+
+        verify(propriedadeService, times(1)).delete(10L);
+        verify(telefoneRepository, times(1)).deleteAll(List.of(telefone));
         verify(produtorRepository, times(1)).delete(existingProdutor);
     }
 

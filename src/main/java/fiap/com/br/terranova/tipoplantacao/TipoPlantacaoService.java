@@ -1,6 +1,7 @@
 package fiap.com.br.terranova.tipoplantacao;
 
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
+import fiap.com.br.terranova.talhao.TalhaoRepository;
 import fiap.com.br.terranova.tipoplantacao.dto.TipoPlantacaoRequest;
 import fiap.com.br.terranova.tipoplantacao.dto.TipoPlantacaoResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TipoPlantacaoService {
 
     private final TipoPlantacaoRepository repository;
+    private final TalhaoRepository talhaoRepository;
 
     public Page<TipoPlantacaoResponse> findAll(Pageable pageable) {
         return repository.findAll(pageable).map(TipoPlantacaoResponse::fromEntity);
@@ -39,6 +41,7 @@ public class TipoPlantacaoService {
     @Transactional
     public void delete(Long id) {
         TipoPlantacao entity = findTipoPlantacaoById(id);
+        if (talhaoRepository.existsByTipoPlantacaoIdTipoPlant(id)) throw new IllegalArgumentException("Tipo de plantacao em uso por talhao. Atualize ou remova os talhoes antes de excluir.");
         repository.delete(entity);
     }
 

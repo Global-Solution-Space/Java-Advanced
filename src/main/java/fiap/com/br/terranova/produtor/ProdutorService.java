@@ -3,6 +3,9 @@ package fiap.com.br.terranova.produtor;
 import fiap.com.br.terranova.exception.ResourceNotFoundException;
 import fiap.com.br.terranova.produtor.dto.ProdutorRequest;
 import fiap.com.br.terranova.produtor.dto.ProdutorResponse;
+import fiap.com.br.terranova.propriedade.Propriedade;
+import fiap.com.br.terranova.propriedade.PropriedadeRepository;
+import fiap.com.br.terranova.propriedade.PropriedadeService;
 import fiap.com.br.terranova.telefone.Telefone;
 import fiap.com.br.terranova.telefone.TelefoneRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +14,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ProdutorService {
 
     private final ProdutorRepository produtorRepository;
     private final TelefoneRepository telefoneRepository;
+    private final PropriedadeRepository propriedadeRepository;
+    private final PropriedadeService propriedadeService;
 
     public Page<ProdutorResponse> findAll(Pageable pageable) {
         return produtorRepository.findAll(pageable).map(ProdutorResponse::fromEntity);
@@ -49,6 +56,11 @@ public class ProdutorService {
     @Transactional
     public void delete(Long id) {
         Produtor entity = findProdutorById(id);
+        List<Propriedade> propriedades = propriedadeRepository.findByProdutorIdProdutor(id);
+        for (Propriedade propriedade : propriedades) {
+            propriedadeService.delete(propriedade.getIdPropriedade());
+        }
+        telefoneRepository.deleteAll(telefoneRepository.findAllByProdutorIdProdutor(id));
         produtorRepository.delete(entity);
     }
 

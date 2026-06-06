@@ -42,7 +42,7 @@ public class ReqApiService {
     private final NasaPowerClient nasaPowerClient;
     private final SatVegClient satVegClient;
 
-    @Value("${satveg.api.token:Bearer e97dab05-eedc-39b9-a3fd-fa83cb5fef5e}")
+    @Value("${satveg.api.token:}")
     private String satVegToken;
 
     public Page<ReqApiResponse> findAll(Pageable pageable) {
@@ -102,11 +102,21 @@ public class ReqApiService {
     // INTEGRAÇÃO EXTERNA
     private List<DadoTemporal> fetchDadosExternos(String tipoApiNome, ReqApiRequest request, Talhao talhao, ReqApi reqApi) {
         String tipo = tipoApiNome.toUpperCase();
+        validarTipoParamCompativel(tipo, request.tipoParam());
         return switch (tipo) {
             case "NASAPOWER" -> fetchNasaPowerData(talhao, reqApi);
             case "SATVEG" -> fetchSatVegData(talhao, reqApi);
             default -> throw new IllegalArgumentException("Tipo de API não suportado: " + tipo);
         };
+    }
+
+    private void validarTipoParamCompativel(String tipoApiNome, String tipoParam) {
+        if ("NASAPOWER".equals(tipoApiNome) && !"PRECTOTCORR".equalsIgnoreCase(tipoParam)) {
+            throw new IllegalArgumentException("NASAPOWER suporta apenas o parametro PRECTOTCORR.");
+        }
+        if ("SATVEG".equals(tipoApiNome) && !"NDVI".equalsIgnoreCase(tipoParam)) {
+            throw new IllegalArgumentException("SATVEG suporta apenas o parametro NDVI.");
+        }
     }
 
     private List<DadoTemporal> fetchNasaPowerData(Talhao talhao, ReqApi reqApi) {
@@ -151,6 +161,10 @@ public class ReqApiService {
 
     private List<DadoTemporal> fetchSatVegData(Talhao talhao, ReqApi reqApi) {
         try {
+            if (satVegToken == null || satVegToken.isBlank()) {
+                throw new IllegalArgumentException("Token da API SATVeg nao configurado. Defina satveg.api.token ou SATVEG_API_TOKEN.");
+            }
+
             log.info("Buscando series temporais na Embrapa SATveg para o Talhao {}", talhao.getIdTalhao());
             SatVegDataResponse apiResponse = satVegClient.getSeries(satVegToken, buildSatVegRequest(talhao));
 
@@ -176,6 +190,8 @@ public class ReqApiService {
         } catch (feign.FeignException e) {
             log.error("Erro na API da Embrapa SATveg", e);
             throw new IllegalArgumentException("Falha na integracao com SATveg. Status: " + e.status());
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Erro ao integrar com a API da Embrapa SATveg", e);
             throw new IllegalArgumentException("Erro inesperado na integracao com a Embrapa SATveg: " + e.getMessage());

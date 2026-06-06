@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -63,6 +64,7 @@ class ReqApiServiceIntegrationTest {
                 .build();
                 
         mockTalhao = Talhao.builder().idTalhao(1L).localizacao(loc).build();
+        ReflectionTestUtils.setField(service, "satVegToken", "Bearer test-token");
     }
 
     @Test
@@ -206,6 +208,54 @@ class ReqApiServiceIntegrationTest {
         });
 
         assertTrue(exception.getMessage().contains("Erro inesperado na integracao com a NASA POWER: Timeout na conexao"));
+    }
+
+    @Test
+    void shouldRejectNasaPowerWithNdviParam() {
+        ReqApiRequest request = new ReqApiRequest("NDVI", "NASAPOWER", 1L);
+        TipoApi tipoNasa = TipoApi.builder().idTipo(1L).tipoApi("NASAPOWER").build();
+
+        when(tipoApiRepository.findByTipoApi("NASAPOWER")).thenReturn(Optional.of(tipoNasa));
+        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
+        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.create(request));
+
+        assertTrue(exception.getMessage().contains("NASAPOWER suporta apenas o parametro PRECTOTCORR"));
+        verify(nasaPowerClient, never()).getDailyData(anyMap());
+        verify(dadoTemporalRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void shouldRejectSatVegWithPrecipitationParam() {
+        ReqApiRequest request = new ReqApiRequest("PRECTOTCORR", "SATVEG", 1L);
+        TipoApi tipoSatVeg = TipoApi.builder().idTipo(2L).tipoApi("SATVEG").build();
+
+        when(tipoApiRepository.findByTipoApi("SATVEG")).thenReturn(Optional.of(tipoSatVeg));
+        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
+        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.create(request));
+
+        assertTrue(exception.getMessage().contains("SATVEG suporta apenas o parametro NDVI"));
+        verify(satVegClient, never()).getSeries(anyString(), any(SatVegDataRequest.class));
+        verify(dadoTemporalRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenSatVegTokenIsMissing() {
+        ReqApiRequest request = new ReqApiRequest("NDVI", "SATVEG", 1L);
+        TipoApi tipoSatVeg = TipoApi.builder().idTipo(2L).tipoApi("SATVEG").build();
+        ReflectionTestUtils.setField(service, "satVegToken", "");
+
+        when(tipoApiRepository.findByTipoApi("SATVEG")).thenReturn(Optional.of(tipoSatVeg));
+        when(talhaoRepository.findById(1L)).thenReturn(Optional.of(mockTalhao));
+        when(reqApiRepository.save(any(ReqApi.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.create(request));
+
+        assertTrue(exception.getMessage().contains("Token da API SATVeg nao configurado"));
+        verify(satVegClient, never()).getSeries(anyString(), any(SatVegDataRequest.class));
     }
 
     @Test
