@@ -19,7 +19,7 @@ API REST para monitoramento agrícola inteligente, integrando dados de proprieda
 | Recurso | Link |
 | --- | --- |
 | Repositório GitHub | [Repositório Github](https://github.com/Global-Solution-Space/Java-Advanced) |
-| Deploy público | [Link Deploy]() |
+| Deploy público | [Link Deploy](https://java-advanced-production.up.railway.app/api/) |
 | Swagger/OpenAPI local | `http://localhost:8080/swagger-ui.html` |
 | OpenAPI JSON local | `http://localhost:8080/v3/api-docs` |
 | Coleção Insomnia | [`insomnia.yaml`](./insomnia.yaml) |
