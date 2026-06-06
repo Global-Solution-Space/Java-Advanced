@@ -216,27 +216,6 @@ Esses validadores implementam a interface `ConstraintValidator<A, T>`, garantind
 
 ---
 
-## Funcionalidades Implementadas
-
-- CRUD completo para produtores, telefones, localizações, propriedades, tipos de plantação, talhões e alertas.
-- Listagem paginada com `Pageable` nos CRUDs principais.
-- Endpoints de `DadoTemporal` retornam coleções completas de séries temporais para atender ao consumo agregado do Mobile.
-- DTOs em Java Records.
-- Validação de entrada com Spring Validation.
-- Validadores customizados para e-mail único, área de propriedade/talhão, enums e coordenadas.
-- Responses com HATEOAS.
-- Tratamento global de exceções.
-- Documentação Swagger/OpenAPI.
-- CORS configurado globalmente.
-- Seed inicial de tipos de API, tipos de plantação e dados de exemplo.
-- Integração externa com NASA POWER e SATVeg via OpenFeign, isolada em services próprios.
-- Persistência de dados temporais retornados pelas APIs externas.
-- Geração automática de alertas agrícolas.
-- Coleção Insomnia atualizada com os endpoints do projeto.
-- Suíte de testes automatizados para controllers, services, validators, DTOs e exceptions.
-
----
-
 ## Endpoints da API
 
 ### Localizações
@@ -340,14 +319,12 @@ Compatibilidade de parâmetros:
 
 ### Dados Temporais
 
-Os endpoints de dados temporais retornam coleções completas, sem `Pageable`, porque o Mobile consome a série inteira para visualização e análise local. Como cada integração pode gerar centenas de pontos, uma versão paginada pode ser adicionada futuramente em rota separada sem quebrar o contrato atual.
-
 | Método | Endpoint | Descrição |
 | --- | --- | --- |
 | `GET` | `/api/dados-temporais` | Lista todos os dados temporais em uma coleção completa, sem paginação |
 | `GET` | `/api/dados-temporais/{id}` | Busca dado temporal por ID |
-| `GET` | `/api/dados-temporais/talhao/{idTalhao}` | Lista todos os dados temporais por talhão, sem paginação |
-| `GET` | `/api/dados-temporais/req-api/{idReqApi}` | Lista todos os dados temporais por requisição, sem paginação |
+| `GET` | `/api/dados-temporais/talhao/{idTalhao}` | Lista dados temporais por talhão com paginação, padrão `size=100&sort=idDado,desc` |
+| `GET` | `/api/dados-temporais/req-api/{idReqApi}` | Lista dados temporais por requisição de API com paginação, padrão `size=100&sort=idDado,desc` |
 
 ### Alertas Agrícolas
 
@@ -432,7 +409,7 @@ No Windows:
 mvnw.cmd spring-boot:run
 ```
 
-### Acessos
+### Acesso Local
 
 | Recurso | URL |
 | --- | --- |
@@ -470,29 +447,3 @@ BUILD SUCCESS
 
 A coleção [`insomnia.yaml`](./insomnia.yaml) também pode ser importada no Insomnia para testar os endpoints manualmente.
 
----
-
-## Status em Relação aos Requisitos Java Advanced
-
-| Critério | Status | Evidência no projeto |
-| --- | --- | --- |
-| API REST com Java e Spring Boot | Implementado | Controllers em `/api/*` |
-| Organização em camadas | Implementado | Controller, Service, Repository, DTO |
-| Verbos HTTP e status codes | Implementado | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`; `200`, `201`, `204`, `400`, `404`, `500` |
-| HATEOAS | Implementado | Responses com `EntityModel`, `CollectionModel` e links |
-| Injeção de dependência | Implementado | `@RequiredArgsConstructor` e atributos `final` |
-| Lombok | Implementado | Entidades e services |
-| Spring Boot DevTools | Implementado | Dependência no `pom.xml` |
-| Spring Data JPA / ORM | Implementado | Entidades JPA e repositories |
-| JpaRepository | Implementado | Repositories de domínio |
-| CRUD completo | Implementado para recursos principais | Localizações, produtores, telefones, propriedades, tipos, talhões e alertas |
-| Pageable | Implementado nos CRUDs principais | `DadoTemporal` retorna coleções completas para manter o contrato usado pelo Mobile |
-| DTOs / Java Records | Implementado | Requests e responses em `record` |
-| Spring Validation | Implementado | Validações nos DTOs |
-| Tratamento de exceções | Implementado | `GlobalExceptionHandler` |
-| Modelagem avançada | Implementado parcialmente | Múltiplas tabelas, relacionamentos JPA, enums, validadores customizados e integração temporal |
-| Swagger/OpenAPI | Implementado | SpringDoc + `OpenApiConfig` |
-| CORS | Implementado | `CorsConfig` |
-| Deploy público | Pendente | Inserir link após deploy |
-| Vídeo de apresentação | Pendente | Inserir link após gravação |
-| Vídeo pitch | Pendente | Inserir link após gravação |
