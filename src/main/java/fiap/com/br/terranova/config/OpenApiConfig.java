@@ -3,6 +3,7 @@ package fiap.com.br.terranova.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI terranovaOpenAPI() {
         return new OpenAPI()
+                .addServersItem(new Server().url("/"))
                 .info(new Info().title("Terra Nova API")
                         .description("API REST para monitoramento agrícola inteligente integrado com NASA e SatVeg Embrapa.")
                         .version("v1.0.0"))
