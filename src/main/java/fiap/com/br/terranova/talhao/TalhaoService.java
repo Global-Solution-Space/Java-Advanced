@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -87,7 +86,7 @@ public class TalhaoService {
     }
 
     private TipoPlantacao getTipoPlantacao(Long id) {
-        return tipoPlantacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tipo Plantacão com id " + id + " não encontrado."));
+        return tipoPlantacaoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tipo Plantação com id " + id + " não encontrado."));
     }
 
     private Propriedade getPropriedade(Long id) {

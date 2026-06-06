@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -92,22 +91,17 @@ public class AlertaService {
         };
 
         List<DadoTemporal> dados = dadoTemporalRepository
-                .findByTalhaoIdTalhaoAndReqApiTipoApiTipoApiIgnoreCaseAndDataLeituraAfter(talhao.getIdTalhao(), tipoApiNome, janela);
+                .buscarDadosParaAnalise(talhao.getIdTalhao(), tipoApiNome, janela);
 
         if (dados == null || dados.isEmpty()) {
             log.info("Nenhum dado histórico encontrado para análise. Talhão={}, Tipo={}", talhao.getIdTalhao(), tipoApiNome);
             return;
         }
 
-        // Ordena por data decrescente (mais recentes primeiro) — compartilhado entre os dois tipos
-        List<DadoTemporal> dadosOrdenados = dados.stream()
-                .sorted(Comparator.comparing(DadoTemporal::getDataLeitura).reversed())
-                .toList();
-
         if ("nasapower".equals(tipo)) {
-            analisarNasa(talhao, dadosOrdenados);
+            analisarNasa(talhao, dados);
         } else if ("satveg".equals(tipo)) {
-            analisarSatVeg(talhao, dadosOrdenados);
+            analisarSatVeg(talhao, dados);
         }
     }
 

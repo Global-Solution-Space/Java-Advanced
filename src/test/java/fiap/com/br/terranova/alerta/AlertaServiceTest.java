@@ -179,7 +179,7 @@ class AlertaServiceTest {
         Talhao talhao = new Talhao();
         talhao.setIdTalhao(1L);
 
-        when(dadoTemporalRepository.findByTalhaoIdTalhaoAndReqApiTipoApiTipoApiIgnoreCaseAndDataLeituraAfter(
+        when(dadoTemporalRepository.buscarDadosParaAnalise(
                 eq(1L), eq("NASAPOWER"), any(LocalDate.class))).thenReturn(List.of());
 
         alertaService.analisarEGerarAlertas(talhao, "NASAPOWER");
@@ -197,7 +197,7 @@ class AlertaServiceTest {
         DadoTemporal d3 = DadoTemporal.builder().dataLeitura(LocalDate.now().minusDays(2)).valor(30.0).build();
         // Soma 3 dias = 90.0 > 80.0 -> ALAGAMENTO
 
-        when(dadoTemporalRepository.findByTalhaoIdTalhaoAndReqApiTipoApiTipoApiIgnoreCaseAndDataLeituraAfter(
+        when(dadoTemporalRepository.buscarDadosParaAnalise(
                 eq(1L), eq("nasapower"), any(LocalDate.class))).thenReturn(List.of(d1, d2, d3));
         
         when(alertaRepository.existsByTalhaoAndTituloAndResolvido(any(), anyString(), eq("N"))).thenReturn(false);
@@ -219,7 +219,7 @@ class AlertaServiceTest {
         DadoTemporal d2 = DadoTemporal.builder().dataLeitura(LocalDate.now().minusDays(5)).valor(3.0).build();
         // Soma 15 dias = 5.0 < 10.0 -> SECA SEVERA
 
-        when(dadoTemporalRepository.findByTalhaoIdTalhaoAndReqApiTipoApiTipoApiIgnoreCaseAndDataLeituraAfter(
+        when(dadoTemporalRepository.buscarDadosParaAnalise(
                 eq(1L), eq("nasapower"), any(LocalDate.class))).thenReturn(List.of(d1, d2));
         
         when(alertaRepository.existsByTalhaoAndTituloAndResolvido(any(), anyString(), eq("N"))).thenReturn(false);
@@ -239,7 +239,7 @@ class AlertaServiceTest {
         DadoTemporal d1 = DadoTemporal.builder().dataLeitura(LocalDate.now()).valor(2.0).build();
         DadoTemporal d2 = DadoTemporal.builder().dataLeitura(LocalDate.now().minusDays(1)).valor(3.0).build();
 
-        when(dadoTemporalRepository.findByTalhaoIdTalhaoAndReqApiTipoApiTipoApiIgnoreCaseAndDataLeituraAfter(
+        when(dadoTemporalRepository.buscarDadosParaAnalise(
                 eq(1L), eq("nasapower"), any(LocalDate.class))).thenReturn(List.of(d1, d2));
         when(alertaRepository.existsByTalhaoAndTituloAndResolvido(talhao, "Seca Severa (NASA)", "N")).thenReturn(true);
 
@@ -256,7 +256,7 @@ class AlertaServiceTest {
         // NDVI atual = 0.15 (< 0.2)
         DadoTemporal d1 = DadoTemporal.builder().dataLeitura(LocalDate.now()).valor(0.15).build();
 
-        when(dadoTemporalRepository.findByTalhaoIdTalhaoAndReqApiTipoApiTipoApiIgnoreCaseAndDataLeituraAfter(
+        when(dadoTemporalRepository.buscarDadosParaAnalise(
                 eq(1L), eq("satveg"), any(LocalDate.class))).thenReturn(List.of(d1));
         
         when(alertaRepository.existsByTalhaoAndTituloAndResolvido(any(), anyString(), eq("N"))).thenReturn(false);

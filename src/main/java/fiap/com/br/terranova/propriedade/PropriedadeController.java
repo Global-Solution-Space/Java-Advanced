@@ -54,7 +54,7 @@ public class PropriedadeController {
     @Operation(summary = "Cadastrar", description = "Cadastra um novo registro no sistema.")
     @PostMapping
     public ResponseEntity<EntityModel<PropriedadeResponse>> create(@RequestBody @Valid PropriedadeRequest request) {
-        return new ResponseEntity<>(service.create(request).toEntityModel(), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request).toEntityModel());
     }
 
     @Operation(summary = "Atualizar", description = "Atualiza os dados de um registro existente.")

@@ -54,7 +54,7 @@ public class AlertaController {
     @Operation(summary = "Cadastrar", description = "Cadastra um novo registro no sistema.")
     @PostMapping
     public ResponseEntity<EntityModel<AlertaResponse>> create(@RequestBody @Valid AlertaRequest request) {
-        return new ResponseEntity<>(service.create(request).toEntityModel(), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request).toEntityModel());
     }
 
     @Operation(summary = "Atualizar", description = "Atualiza os dados de um registro existente.")

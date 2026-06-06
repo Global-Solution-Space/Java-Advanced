@@ -113,7 +113,8 @@ class ReqApiControllerTest {
 
         mockMvc.perform(get("/api/req-api/talhao/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].tipoApiNome").value("SATVEG"));
+                .andExpect(jsonPath("$.content[0].tipoApiNome").value("SATVEG"))
+                .andExpect(jsonPath("$.links[0].rel").value("self"));
     }
 
     @Test

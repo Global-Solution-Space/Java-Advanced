@@ -38,7 +38,7 @@ public class ProdutorController {
     @Operation(summary = "Cadastrar", description = "Cadastra um novo registro no sistema.")
     @PostMapping
     public ResponseEntity<EntityModel<ProdutorResponse>> create(@RequestBody @Valid ProdutorRequest request) {
-        return new ResponseEntity<>(service.create(request).toEntityModel(), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request).toEntityModel());
     }
 
     @Operation(summary = "Atualizar", description = "Atualiza os dados de um registro existente.")

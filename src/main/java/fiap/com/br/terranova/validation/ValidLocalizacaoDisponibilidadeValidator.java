@@ -5,29 +5,20 @@ import fiap.com.br.terranova.talhao.TalhaoRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.Map;
 
 @Component
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class ValidLocalizacaoDisponibilidadeValidator implements ConstraintValidator<ValidLocalizacaoDisponivel, Long> {
 
-    @Setter
-    @Autowired
-    private PropriedadeRepository propriedadeRepository;
-
-    @Setter
-    @Autowired
-    private TalhaoRepository talhaoRepository;
-
-    @Setter
-    @Autowired
-    private HttpServletRequest request;
+    private final PropriedadeRepository propriedadeRepository;
+    private final TalhaoRepository talhaoRepository;
+    private final HttpServletRequest request;
 
     @Override
     public boolean isValid(Long idLocalizacao, ConstraintValidatorContext context) {
@@ -45,7 +36,6 @@ public class ValidLocalizacaoDisponibilidadeValidator implements ConstraintValid
             Map<?, ?> pathVariables = (Map<?, ?>) attr;
             if (pathVariables.containsKey("id")) {
                 try {
-                    Long id = Long.parseLong(String.valueOf(pathVariables.get("id")));
                     // Em update, permite se a localização já está vinculada à mesma entidade
                     return true;
                 } catch (NumberFormatException ignored) {}
