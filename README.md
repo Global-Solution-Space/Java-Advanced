@@ -216,7 +216,11 @@ A entidade `Localizacao` foi construída utilizando o tipo `org.locationtech.jts
 
 ## Modelagem de Dados
 
-![Diagrama de Entidade-Relacionamento (ERD)](./docs/diagrama-banco.png)
+### Modelo Lógico
+![Modelo Lógico](./docs/Logical.png)
+
+### Modelo Relacional
+![Modelo Relacional](./docs/Relational.png)
 
 ---
 
