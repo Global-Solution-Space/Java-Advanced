@@ -21,7 +21,7 @@ INSERT INTO produtor (nome, email, senha) VALUES ('Enzo', 'enzo@terranova.com', 
 INSERT INTO telefone (ddd, numero, produtor_id_produtor) VALUES ('11', '999999999', (SELECT id_produtor FROM produtor WHERE email = 'enzo@terranova.com'));
 INSERT INTO localizacao (id_localizacao, coordenadas) VALUES
 (1, 'SRID=4326;POINT(-46.737400 -23.384900)'),
-(2, 'SRID=4326;POINT(-46.737803 -23.384468)'),
+(2, 'SRID=4326;POINT(-45.00 -23.55)'),
 (3, 'SRID=4326;POINT(-46.738000 -23.385000)'),
 (4, 'SRID=4326;POINT(-36.287900 -7.488700)'),
 (5, 'SRID=4326;POINT(-36.287200 -7.489100)'),

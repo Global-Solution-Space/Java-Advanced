@@ -83,7 +83,7 @@ public class AlertaService {
 
         LocalDate janela = switch (tipo) {
             case "nasapower" -> LocalDate.now().minusDays(15);
-            case "satveg" -> LocalDate.now().minusDays(90);
+            case "satveg" -> LocalDate.now().minusDays(365);
             default -> {
                 log.warn("Tipo de API desconhecido para análise: {}", tipoApiNome);
                 yield LocalDate.now().minusDays(15);
@@ -130,7 +130,7 @@ public class AlertaService {
         }
     }
 
-    // ANÁLISE SATVEG — janela de 90 dias, avalia o NDVI mais recente
+    // ANÁLISE SATVEG — janela de 365 dias, avalia o NDVI mais recente
     private void analisarSatVeg(Talhao talhao, List<DadoTemporal> dadosOrdenados) {
         DadoTemporal ultimoDado = dadosOrdenados.get(0);
         double ndvi = ultimoDado.getValor();

@@ -358,8 +358,8 @@ O `AlertaService` analisa dados recentes após cada integração externa:
 | NASA POWER | 3 dias | Chuva acumulada acima de 80 mm | Risco de Alagamento | `ALTO` |
 | NASA POWER | 15 dias | Chuva acumulada abaixo de 10 mm | Seca Severa | `CRITICO` |
 | NASA POWER | 15 dias | Chuva acumulada abaixo de 25 mm | Estresse Hídrico | `MEDIO` |
-| SATVeg | 90 dias | NDVI atual abaixo de 0.2 | Anomalia Vegetativa Severa | `CRITICO` |
-| SATVeg | 90 dias | NDVI atual abaixo de 0.4 | Baixo Vigor Vegetativo | `MEDIO` |
+| SATVeg | 365 dias | NDVI atual abaixo de 0.2 | Anomalia Vegetativa Severa | `CRITICO` |
+| SATVeg | 365 dias | NDVI atual abaixo de 0.4 | Baixo Vigor Vegetativo | `MEDIO` |
 
 O sistema evita duplicar alertas automáticos ativos com o mesmo talhão, título e `resolvido = "N"`.
 

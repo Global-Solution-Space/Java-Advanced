@@ -175,7 +175,7 @@ Nao existe `PUT /api/req-api/{id}` no controller atual.
   - Chuva dos ultimos 3 dias acima de 80 mm gera **Risco de Alagamento (NASA)** com nivel `ALTO`.
   - Chuva acumulada em 15 dias abaixo de 10 mm gera **Seca Severa (NASA)** com nivel `CRITICO`.
   - Chuva acumulada em 15 dias abaixo de 25 mm gera **Estresse Hidrico (NASA)** com nivel `MEDIO`.
-- `SATVEG`: janela de 90 dias.
+- `SATVEG`: janela de 365 dias.
   - NDVI mais recente abaixo de 0.2 gera **Anomalia Vegetativa Severa (SATVEG)** com nivel `CRITICO`.
   - NDVI mais recente abaixo de 0.4 gera **Baixo Vigor Vegetativo (SATVEG)** com nivel `MEDIO`.
 
