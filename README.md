@@ -23,8 +23,8 @@ API REST para monitoramento agrícola inteligente, integrando dados de proprieda
 | Swagger/OpenAPI local | `http://localhost:8080/swagger-ui.html` |
 | OpenAPI JSON local | `http://localhost:8080/v3/api-docs` |
 | Coleção Insomnia | [`insomnia.yaml`](./insomnia.yaml) |
-| Vídeo de apresentação | [Vídeo Youtube 10 Minutos]() |
-| Vídeo pitch | [Vídeo Youtube 3 Minutos]() |
+| Vídeo de apresentação | [Vídeo Youtube 10 Minutos](https://www.youtube.com/watch?v=6n1A4wfooSE) |
+| Vídeo pitch | [Vídeo Youtube 3 Minutos](https://www.youtube.com/watch?v=-ik2puItyfQ) |
 
 ---
 
