@@ -27,6 +27,6 @@ public class Telefone {
     private String numero;
 
     @OneToOne
-    @JoinColumn(name = "produtor_id_produtor")
+    @JoinColumn(name = "produtor_id_produtor", unique = true)
     private Produtor produtor;
 }
