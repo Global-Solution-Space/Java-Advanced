@@ -212,6 +212,31 @@ Esses validadores implementam a interface `ConstraintValidator<A, T>`, garantind
 #### 5. Hibernate Spatial & Mapeamento SDO_GEOMETRY
 A entidade `Localizacao` foi construída utilizando o tipo `org.locationtech.jts.geom.Point`, provido pela biblioteca JTS (Java Topology Suite). Essa abstração permite que o Hibernate Spatial seja completamente "agnóstico" em relação ao banco de dados subjacente: quando em desenvolvimento local, a aplicação interage com o tipo nativo `GEOMETRY` do H2; no ambiente de homologação/produção rodando Oracle Database, o Hibernate traduz o tipo Java automaticamente para a estrutura nativa `MDSYS.SDO_GEOMETRY`. Isso possibilita o uso de indexação espacial, além de suportar operações como cálculo de distância e intersecção entre talhões, aderindo aos requisitos de banco de dados avançado.
 
+
+---
+
+## Prints Importantes
+
+### Railway
+![Print Railway](docs/railway.png)
+
+
+### Build Logs Railway
+
+![Print Build](docs/build-railway.png)
+
+### Logs Railway
+
+![Print Logs](docs/http-railway.png)
+
+### Swagger Railway
+
+![Print Swagger](docs/swagger-railway.png)
+
+### H2 Railway
+
+![Print H2](docs/h2-railway.png)
+
 ---
 
 ## Modelagem de Dados
